@@ -14,14 +14,13 @@ build:
 	mkdir -p databases
 	touch log.txt
 
-test:
+test: build
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
-play:
+dbms: build
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
-zip:
-	zip keyDB.zip *.ml* _tags Makefile
+zip: zip keyDB.zip *.ml* _tags Makefile
 	
 docs: docs-public docs-private
 	
@@ -38,6 +37,5 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private keyDB.zip
-	rm -rf databases
-	rm log.txt
+	rm -rf doc.public doc.private keyDB.zip databases
+	
