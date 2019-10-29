@@ -2,7 +2,8 @@
 doc.public
 doc.private
 keyDB.zip
-report
+databases
+log.txt
 
 # ocaml
 *.cmo
