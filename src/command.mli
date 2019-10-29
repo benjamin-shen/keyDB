@@ -7,34 +7,40 @@
     phrase, where a {i word} is defined as a consecutive sequence of non-space 
     characters.  Thus, no element of the list should contain any leading,
     internal, or trailing spaces.  The list is in the same order as the words 
-    in the original user command.  For example:
-    - If the player command is ["CREATE table col1 col2 col3"], then the object 
-      phrase is [["table"; "col1"; "col2"; "col3"]].
-    - If the player command is ["DROP table"], then the object phrase is
-      again [["table"]]. 
+    in the original user command.
 
-    An [object_phrase] is not permitted to be the empty list. *)
-type object_phrase = string list
+    An [object_phrase] is not permitted to be the empty list.
+
+    TODO: edit this specification *)
+type filename = string
+type key = int
+type column = string
+type columns = string list
+type values = string list
+type conditions = string list
 
 (** The type [command] represents a user command that is decomposed
     into a verb and possibly an object phrase. The object phrase *)
 type command = 
-  | In of object_phrase         (* command  keyword *)
-  | Where of object_phrase      (* command  keyword *)
-  | Select of object_phrase     (* display  data *)
-  | Create of object_phrase     (* create table *)
-  | Drop of object_phrase       (* drop table *)
-  | Insert of object_phrase     (* insert row *)
-  | Remove of object_phrase     (* remove row  *)
-  | Add of object_phrase        (* add col *)
-  | Delete of object_phrase     (* del col *)
-  | Update of object_phrase     (* update cell *)
-  | Sum of object_phrase        (* sum values *)
-  | Count of object_phrase      (* count values *)
-  | Count_Null of object_phrase (* count null values *)
-  | Log    (* show log *)
-  | Undo   (* reverse last command *)
-  | Quit   (* quit the DBMS *)
+  | Create of {file:filename;  (* create table cols*)
+               cols:columns}
+  | Drop   of filename         (* drop table *)
+  | In     of filename*command (* in filename command *)
+  | Where  of conditions       (* where condition(s) *)
+  | Select of columns          (* select cols *)
+  | Insert of values           (* insert vals *)
+  | Remove of key              (* remove keyval  *)
+  | Add    of column           (* add col *)
+  | Delete of column           (* del col *)
+  | Update of {key:key;        (* update keyval col newval *)
+               col:column;
+               value:string}
+  | Sum    of column           (* sum col *)
+  | Count  of column           (* count col *)
+  | Count_Null of column       (* count_null col *)
+  | Log
+  | Undo
+  | Quit
 
 (** Raised when an empty command is parsed. *)
 exception Empty
@@ -45,9 +51,6 @@ exception Malformed
 (** [parse str] parses a user's input into a [command], as follows. The first
     word (i.e., consecutive sequence of non-space characters) of [str] becomes 
     the verb. The rest of the words, if any, become the object phrase.
-    Examples: 
-    - [parse "    Create  customers   name  "] is [Create ["customers"; "name"]]
-    - [parse "quit"] is [Quit]. 
 
     Requires: [str] contains only alphanumeric (A-Z, a-z, 0-9) and space 
     characters (only ASCII character code 32; not tabs or newlines, etc.).
