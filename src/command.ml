@@ -26,6 +26,7 @@ type command =
   | Log
   | Undo
   | Quit
+  | Help
 
 exception Empty
 
@@ -59,6 +60,7 @@ let parse str =
     let length = List.length object_phrase in
     if length=0 then
       match command_verb with
+      | "help" -> Help
       | "quit" -> Quit
       | "log" -> Log
       | "undo" -> Undo
@@ -70,10 +72,10 @@ let parse str =
         then Create {
             file = head object_phrase;
             cols = tail object_phrase;
-          } else failwith "`Create [filename] [column names]` failed."
+          } else failwith "`Create [table] [column names]` failed."
       | "drop" -> 
         if length <> 1 
-        then Drop (head object_phrase) else failwith "`Drop [filename]` failed."
+        then Drop (head object_phrase) else failwith "`Drop [table]` failed."
       | _ -> failwith "Not a command."
   with 
   | Empty -> raise Empty

@@ -41,12 +41,15 @@ type command =
   | Log
   | Undo
   | Quit
+  | Help
 
 (** Raised when an empty command is parsed. *)
 exception Empty
 
+(** TODO *)
+type err = string
 (** Raised when a malformed command is encountered. *)
-exception Malformed
+exception Malformed of err
 
 (** [parse str] parses a user's input into a [command], as follows. The first
     word (i.e., consecutive sequence of non-space characters) of [str] becomes 
