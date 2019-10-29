@@ -1,4 +1,4 @@
-(** Represents a table and the functions that operate on it. *)
+(** Represents a table. *)
 
 module type Table = sig
 

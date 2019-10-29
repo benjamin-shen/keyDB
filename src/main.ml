@@ -11,7 +11,7 @@ let rec run_dbms () =
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
-  ANSITerminal.(print_string [red]
+  ANSITerminal.(print_string [green]
                   "\nWelcome to keyDB, a DBMS that handles SQL queries.\n");
   print_endline {|Type "help" to see available commands.|};
   run_dbms ()
