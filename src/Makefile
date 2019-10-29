@@ -1,4 +1,4 @@
-MODULES=table row log command main authors
+MODULES=database table row log command main authors
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
