@@ -20,7 +20,8 @@ test: build
 dbms: build
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
-zip: zip keyDB.zip *.ml* _tags Makefile
+zip: build
+	zip keyDB.zip *.ml* _tags Makefile INSTALL.txt
 	
 docs: docs-public docs-private
 	
@@ -38,4 +39,3 @@ docs-private: build
 clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private keyDB.zip databases
-	
