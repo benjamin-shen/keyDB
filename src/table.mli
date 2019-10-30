@@ -1,5 +1,5 @@
 (** Represents a table. *)
-
+(*
 module type Table = sig
 
   (** A [Table] containing rows and columns. *)
@@ -39,4 +39,4 @@ module type Table = sig
       Raises: some error. *)
   val remove_column : t -> col -> t
 
-end
+end*)

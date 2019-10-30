@@ -15,29 +15,27 @@
 type filename = string
 type key = int
 type column = string
-type columns = string list
 type values = string list
 type conditions = string list
 
 (** The type [command] represents a user command that is decomposed
     into a verb and possibly an object phrase. The object phrase *)
 type command = 
-  | Create of {file:filename;  (* create table cols*)
-               cols:columns}
-  | Drop   of filename         (* drop table *)
-  | In     of filename*command (* in filename command *)
-  | Where  of conditions       (* where condition(s) *)
-  | Select of columns          (* select cols *)
-  | Insert of values           (* insert vals *)
-  | Remove of key              (* remove keyval  *)
-  | Add    of column           (* add col *)
-  | Delete of column           (* del col *)
-  | Update of {key:key;        (* update keyval col newval *)
+  | Create of {file:filename;    (* create table cols*)
+               cols:column list}
+  | Drop   of filename           (* drop table *)
+  | In     of filename*command   (* in filename command *)
+  | Select of column list*conditions (* select cols where conditions *)
+  | Insert of values             (* insert vals *)
+  | Remove of key list           (* remove keyval  *)
+  | Add    of column list        (* add col *)
+  | Delete of column list        (* del col *)
+  | Update of {key:key;          (* update keyval col newval *)
                col:column;
                value:string}
-  | Sum    of column           (* sum col *)
-  | Count  of column           (* count col *)
-  | Count_Null of column       (* count_null col *)
+  | Sum    of column             (* sum col *)
+  | Count  of column             (* count col *)
+  | Count_Null of column         (* count_null col *)
   | Log
   | Undo
   | Quit
@@ -65,3 +63,6 @@ exception Malformed of err
     or if the verb is "quit" and there is a non-empty object phrase,
     or if the verb is "go" and there is an empty object phrase.*)
 val parse : string -> command
+
+(*TODO*)
+val help : unit -> string

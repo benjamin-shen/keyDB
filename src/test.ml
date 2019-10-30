@@ -1,5 +1,10 @@
 open OUnit2
 
+let database_tests = 
+  [
+    "name" >:: (fun _ -> ());
+  ]
+
 let table_tests = 
   [
     "name" >:: (fun _ -> ());
@@ -22,6 +27,7 @@ let command_tests =
 
 let suite =
   "test suite for keyDB"  >::: List.flatten [
+    database_tests;
     table_tests;
     row_tests;
     log_tests;
