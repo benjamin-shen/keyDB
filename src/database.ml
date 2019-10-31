@@ -1,3 +1,9 @@
+open Hashtbl
+
+type key = int
+type column = string
+type value = string
+
 type t = unit
 
 exception Table_Not_Found
@@ -13,7 +19,7 @@ let list_to_csv cols =
   let rev = List.rev cols in 
   let rec tail_to_csv init = function
     | [] -> init
-    | h::t -> h ^ ", " ^ init
+    | h::t -> h ^ "," ^ init
   in (tail_to_csv "" (List.tl rev)) ^ (List.hd rev)
 
 let create_table name cols = 
@@ -22,7 +28,7 @@ let create_table name cols =
     raise Table_Exists
   else  
     let _ = Sys.command ("touch " ^ file) in
-    let _ = Sys.command ({|echo "key, |} ^ list_to_csv cols ^ {|" >> |} ^ file)
+    let _ = Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" >> |} ^ file)
     in
     print_endline ("Created table: " ^ name)
 
@@ -34,8 +40,8 @@ let drop_table name =
   else 
     raise Table_Not_Found
 
-let read filename =
-  ()
+let read (filename : string) : Table.t =
+  failwith ""
 
 let write table =
   ()

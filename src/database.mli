@@ -22,8 +22,8 @@ val drop_table : string -> unit
 
 (** [read filename] will read the csv file with name [filename] and convert
  * it into a Table structure. *)
-val read : string -> unit 
+val read : string -> Table.t 
 
 (** [write table] will look at a [table], convert it to a csv file, and 
  * store it in the database directory. *)
-val write : string -> unit
+val write : Table.t -> t
