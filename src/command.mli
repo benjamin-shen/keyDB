@@ -18,13 +18,9 @@ type column = string
 type values = string list
 type conditions = string list
 
-(** The type [command] represents a user command that is decomposed
-    into a verb and possibly an object phrase. The object phrase *)
-type command = 
-  | Create of {file:filename;    (* create table cols*)
-               cols:column list}
-  | Drop   of filename           (* drop table *)
-  | In     of filename*command   (* in filename command *)
+(** The type [table_command] represents a user command that is 
+    operated on a particular table. *)
+type table_command =
   | Select of column list*conditions (* select cols where conditions *)
   | Insert of values             (* insert vals *)
   | Remove of key list           (* remove keyval  *)
@@ -36,10 +32,17 @@ type command =
   | Sum    of column             (* sum col *)
   | Count  of column             (* count col *)
   | Count_Null of column         (* count_null col *)
+(** The type [command] represents a user command that is decomposed
+    into a verb and possibly an object phrase. *)
+type command = 
   | Log
   | Undo
   | Quit
   | Help
+  | Create of {file:filename;    (* create table cols*)
+               cols:column list}
+  | Drop   of filename           (* drop table *)
+  | In     of filename*table_command   (* in filename command *)
 
 (** Raised when an empty command is parsed. *)
 exception Empty

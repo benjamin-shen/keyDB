@@ -5,11 +5,7 @@ type column = string
 type values = string list
 type conditions = string list
 
-type command = 
-  | Create of {file:filename;
-               cols:column list}
-  | Drop   of filename
-  | In     of filename*command
+type table_command =
   | Select of column list*conditions
   | Insert of values
   | Remove of key list
@@ -21,11 +17,20 @@ type command =
   | Sum    of column
   | Count  of column
   | Count_Null of column
+type command = 
   | Log
   | Undo
   | Quit
   | Help
+  | Create of {file:filename;
+               cols:column list}
+  | Drop   of filename
+  | In     of filename*table_command
 
+(* main commands *)
+let log = "LOG"
+let undo = "UNDO"
+let quit = "QUIT"
 (* database commands *)
 let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
@@ -39,9 +44,6 @@ let update = "IN [table] UPDATE [key] [col] [val]"
 let sum = "IN [table] SUM [col]"
 let count = "IN [table] COUNT [col]"
 let count_null = "IN [table] COUNT_NULL [col]"
-let log = "LOG"
-let undo = "UNDO"
-let quit = "QUIT"
 
 exception Empty
 
@@ -71,7 +73,7 @@ let select_where (input:string list) =
   Select ([],[])
 
 (** [table_command input] is the table command represented by [input]. *)
-let table_command (input:string list) : command =
+let table_command (input:string list) : table_command =
   let command_verb = head input in 
   let object_phrase = tail input in 
   let length = List.length object_phrase in 
