@@ -28,9 +28,9 @@ let create_table name cols =
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in
-  let code = Sys.command ("rm " ^ table) in
-  if code = 0 then  
-    print_endline ("Dropped table: " ^ name)
+  if Sys.file_exists table then begin
+    ignore (Sys.command ("rm " ^ table));
+    print_endline ("Dropped table: " ^ name) end
   else 
     raise Table_Not_Found
 

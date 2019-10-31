@@ -12,6 +12,8 @@ let rec run_dbms () =
     | Help -> print_endline (Command.help ()); run_dbms ()
     | Log -> print_endline (Log.get_log ()); run_dbms ()
     | Undo -> print_endline "Undo not implemented."; run_dbms ()
+    | Create t -> Database.create_table t.file t.cols; run_dbms ()
+    | Drop t -> Database.drop_table t; run_dbms ()
     | _ -> print_endline "Command not implemented."; run_dbms ()
   with 
   | Command.Empty ->

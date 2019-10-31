@@ -101,7 +101,7 @@ let table_command (input:string list) : table_command =
   | _ -> failwith "Not a table command."
 
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 ]+") "" str in
+  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .]+") "" str in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 

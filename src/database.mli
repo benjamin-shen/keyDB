@@ -14,11 +14,11 @@ val dir : string
 
 (** [create_table name cols] will build a new table in a csv file, [name].csv 
  * the columns for this table will be the various strings within [cols]. *)
-val create_table : string -> string list -> t
+val create_table : string -> string list -> unit
 
 (** [drop_table name] will remove the table associated with [name] from
  * the database. *)
-val drop_table : string -> t 
+val drop_table : string -> unit
 
 (** [read filename] will read the csv file with name [filename] and convert
  * it into a Table structure. *)
