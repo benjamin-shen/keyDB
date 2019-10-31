@@ -12,7 +12,11 @@ let rec run_dbms () =
     | Help -> print_endline (Command.help ()); run_dbms ()
     | Log -> print_endline (Log.get_log ()); run_dbms ()
     | Undo -> print_endline "Undo not implemented."; run_dbms ()
-    | Create t -> Database.create_table t.file t.cols; run_dbms ()
+    | Create t -> begin 
+        try Database.create_table t.file t.cols
+        with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
+          print_endline ({|To overwrite it, first do "drop |} ^ t.file ^ {|".|})
+      end; run_dbms ()
     | Drop t -> Database.drop_table t; run_dbms ()
     | _ -> print_endline "Command not implemented."; run_dbms ()
   with 

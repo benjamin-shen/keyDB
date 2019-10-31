@@ -15,14 +15,14 @@
 type filename = string
 type key = int
 type column = string
-type values = string list
+type value = string
 type conditions = string list
 
 (** The type [table_command] represents a user command that is 
     operated on a particular table. *)
 type table_command =
   | Select of column list*conditions (* select cols where conditions *)
-  | Insert of values             (* insert vals *)
+  | Insert of value list         (* insert vals *)
   | Remove of key list           (* remove keyval  *)
   | Add    of column list        (* add col *)
   | Delete of column list        (* del col *)

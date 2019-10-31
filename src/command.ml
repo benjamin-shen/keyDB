@@ -2,12 +2,12 @@ type object_phrase = string list
 type filename = string
 type key = int
 type column = string
-type values = string list
+type value = string
 type conditions = string list
 
 type table_command =
   | Select of column list*conditions
-  | Insert of values
+  | Insert of value list
   | Remove of key list
   | Add    of column list
   | Delete of column list
