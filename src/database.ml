@@ -13,18 +13,17 @@ let list_to_csv cols =
   let rev = List.rev cols in 
   let rec tail_to_csv init = function
     | [] -> init
-    | h::t -> h ^ ", " ^ init
+    | h::t -> h ^ "," ^ init
   in (tail_to_csv "" (List.tl rev)) ^ (List.hd rev)
 
 let create_table name cols = 
   let file = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists file then
     raise Table_Exists
-  else  
-    let _ = Sys.command ("touch " ^ file) in
-    let _ = Sys.command ({|echo "key, |} ^ list_to_csv cols ^ {|" >> |} ^ file)
-    in
-    print_endline ("Created table: " ^ name)
+  else begin
+    ignore (Sys.command ("touch " ^ file));
+    ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" >> |} ^ file));
+    print_endline ("Created table: " ^ name) end
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in

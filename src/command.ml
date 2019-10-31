@@ -121,7 +121,7 @@ let parse str =
       | "create" -> if length < 2 then failwith "create"
         else Create {file = head object_phrase;
                      cols = tail object_phrase;}
-      | "drop" -> if length = 1 then failwith "drop"
+      | "drop" -> if length <> 1 then failwith "drop"
         else Drop (head object_phrase) 
       | "in" -> if length <= 2 then failwith "in"
         else In (head object_phrase, table_command (tail object_phrase))
