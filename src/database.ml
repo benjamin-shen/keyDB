@@ -1,3 +1,9 @@
+open Hashtbl
+
+type key = int
+type column = string
+type value = string
+
 type t = unit
 
 exception Table_Not_Found
@@ -33,8 +39,8 @@ let drop_table name =
   else 
     raise Table_Not_Found
 
-let read filename =
-  ()
+let read (filename : string) : Table.t =
+  failwith ""
 
 let write table =
   ()
