@@ -12,15 +12,13 @@ exception Table_Exists
 
 let dir = "databases"
 
-(** [list_to_csv string list] takes a string list and returns
- * its entries as a string to be input to a csv. The words will be
- * in the same order as they were in the list. *)
-let list_to_csv cols =   
-  let rev = List.rev cols in 
-  let rec tail_to_csv init = function
-    | [] -> init
-    | h::t -> h ^ "," ^ init
-  in (tail_to_csv "" (List.tl rev)) ^ (List.hd rev)
+(** [list_to_csv cols] takes a string list and returns
+    its entries as a string to be input to a csv. The words will be
+    in the same order as they were in the list. *)
+let rec list_to_csv = function
+  | [] -> ""
+  | h::t -> let r = list_to_csv t in 
+    if r = "" then h else h ^ "," ^ r
 
 let create_table name cols = 
   let file = (dir ^ Filename.dir_sep ^ name) in
