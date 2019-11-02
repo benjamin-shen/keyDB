@@ -12,13 +12,15 @@ exception Table_Exists
 (** [dir] is the directory of the database. *)
 val dir : string
 
-(** [create_table name cols] will build a new table in a csv file, [name].csv 
- * the columns for this table will be the various strings within [cols]. *)
-val create_table : string -> string list -> unit
+(** [create_table name cols] will build a new table file [name], with columns
+    [cols]. 
+    Raises: Table_Exists if [name] already exists. *)
+val create_table : string -> string list -> string
 
 (** [drop_table name] will remove the table associated with [name] from
- * the database. *)
-val drop_table : string -> unit
+    the database.
+    Raises: Table_Not_Found if [name] does not exist. *)
+val drop_table : string -> string
 
 (** [read filename] will read the csv file with name [filename] and convert
  * it into a Table structure. *)

@@ -13,12 +13,12 @@ let rec run_dbms () =
     | Log -> print_endline (Log.get_log ()); run_dbms ()
     | Undo -> print_endline "Undo not implemented."; run_dbms ()
     | Create t -> begin 
-        try Database.create_table t.file t.cols
+        try print_endline (Database.create_table t.file t.cols)
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
           print_endline ({|To overwrite it, first do "drop |} ^ t.file ^ {|".|})
       end; run_dbms ()
     | Drop t -> begin
-        try Database.drop_table t
+        try print_endline (Database.drop_table t)
         with _ -> print_endline ("Table " ^ t ^ " does not exist.")
       end; run_dbms ()
     | _ -> print_endline "Command not implemented."; run_dbms ()

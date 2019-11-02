@@ -27,13 +27,13 @@ let create_table name cols =
   else begin
     ignore (Sys.command ("touch " ^ file));
     ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" >> |} ^ file));
-    print_endline ("Created table: " ^ name) end
+    "Created table: " ^ name end
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists table then begin
     ignore (Sys.command ("rm " ^ table));
-    print_endline ("Dropped table: " ^ name) end
+    "Dropped table: " ^ name end
   else 
     raise Table_Not_Found
 
