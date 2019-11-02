@@ -9,7 +9,7 @@ exception Table_Not_Found
 (** Raised when attempting to create a table that already exists. *)
 exception Table_Exists
 
-(** [dir] is the directory of the database, likely databases. *)
+(** [dir] is the directory of the database. *)
 val dir : string
 
 (** [create_table name cols] will build a new table in a csv file, [name].csv 

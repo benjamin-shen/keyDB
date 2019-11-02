@@ -17,7 +17,10 @@ let rec run_dbms () =
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
           print_endline ({|To overwrite it, first do "drop |} ^ t.file ^ {|".|})
       end; run_dbms ()
-    | Drop t -> Database.drop_table t; run_dbms ()
+    | Drop t -> begin
+        try Database.drop_table t
+        with _ -> print_endline ("Table " ^ t ^ " does not exist.")
+      end; run_dbms ()
     | _ -> print_endline "Command not implemented."; run_dbms ()
   with 
   | Command.Empty ->
