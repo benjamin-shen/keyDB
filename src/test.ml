@@ -22,6 +22,11 @@ let database_tests =
            failwith "drop";
          with Table_Not_Found -> ());
       );
+    "read test" >:: (fun _ -> 
+        (try ignore (create_table "test" ["t";"e";"st"]); ()
+         with _ -> failwith "create");
+
+      );
   ]
 
 let table_tests = 

@@ -8,17 +8,18 @@ type condition = string
   * RI: TODO *)
 type t = (key * Row.t) list
 
-let key = ref 0
-
 let rep_ok t = t
 
 let empty = []
 
-let header t = []
+let header = ref []
+let set_header columns = header := columns
+let get_header = !header
 
-let read_row t k r =
+let read_insert_row t k r =
   (k,r)::t
 
+let key = ref 0
 let insert_row t r =
   key := List.length t;
   (!key,r)::t

@@ -52,7 +52,7 @@ let rec table_builder c header acc =
   try  
     let line = input_line c |> String.split_on_char ',' in 
     table_builder c header 
-      (Table.read_row acc (int_of_string (List.hd line)) 
+      (Table.read_insert_row acc (int_of_string (List.hd line)) 
          (row_builder (List.tl line) header Row.empty))
   with
   | End_of_file -> acc
@@ -60,7 +60,8 @@ let rec table_builder c header acc =
 let read (filename : string) : Table.t =
   try (* attempt to open file, call [table_builder] if present. *)
     let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
-    let header = input_line channel |> String.split_on_char ',' in
+    let header = List.tl (input_line channel |> String.split_on_char ',') in
+    Table.set_header header;
     table_builder channel header Table.empty
   with
   | Sys_error _ -> raise Table_Not_Found
@@ -70,4 +71,4 @@ let write filename table =
   if Sys.file_exists file then
     raise Table_Exists
   else
-    table |> Table.header |> create_table filename
+    ""
