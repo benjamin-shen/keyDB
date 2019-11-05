@@ -6,9 +6,6 @@ type t
 (** [empty] is the empty row. *)
 val empty : t 
 
-(** [length r] is the quantity of columns, or entries, in the row. *)
-val length : t -> int
-
 (** [value r c] is the value in [r] at column [c]. *)
 val value : t  -> string ->  string
 

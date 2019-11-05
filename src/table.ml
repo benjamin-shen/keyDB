@@ -8,25 +8,25 @@ type value = string
 type t = (key * Row.t) list
 
 let rep_ok t = 
-  failwith "unimplemented"
+  t
 
 let empty = 
   []
 
 let insert_row t r =
-  failwith "unimplemented"
+  failwith "insert"
 
 let remove_row t r =
-  failwith "unimplemented"
+  failwith "remove"
 
 let select t c =
-  failwith "unimplemented"
+  failwith "select"
 
 let get_column t c =
-  failwith "unimplemented"
+  failwith "get_column"
 
 let add_column t c=
-  failwith "unimplemented"
+  failwith "add_column"
 
 let remove_column t c=
-  failwith "unimplemented"
+  failwith "remove_column"

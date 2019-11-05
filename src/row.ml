@@ -1,10 +1,7 @@
 type t = (string, string) Hashtbl.t
 
 let empty = 
-  failwith "unimplemented"
-
-let length r = 
-  failwith "unimplemented"
+  Hashtbl.create 10
 
 let value r c =
   failwith "unimplemented"

@@ -38,6 +38,8 @@ let drop_table name =
     raise Table_Not_Found
 
 let read (filename : string) : Table.t =
+  Table.empty
+(*
   let handle = Unix.opendir dir 
   in
   (** [parse line] will parse a line into a string list. *)
@@ -62,6 +64,6 @@ let rec tbl_find =
   else
     tbl_find in
 tbl_find
-
-let write table =
+*)
+let write (table : Table.t) : unit =
   ()
