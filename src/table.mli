@@ -40,3 +40,6 @@ val add_column : t -> string -> t
     a table without the specified column. 
     Raises: some error. *)
 val remove_column : t -> string -> t
+
+(** [to_csv t] converts table [t] into a csv string *)
+val to_csv : t -> string

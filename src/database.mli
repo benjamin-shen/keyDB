@@ -23,9 +23,9 @@ val create_table : string -> string list -> string
 val drop_table : string -> string
 
 (** [read filename] will read the csv file with name [filename] and convert
- * it into a Table structure. *)
+    it into a Table structure. *)
 val read : string -> Table.t
 
 (** [write filename table] will look at a [table], convert it to a csv file, and 
- * store it in the database directory with name [filename]. *)
+    store it in the database directory with name [filename]. *)
 val write : string -> Table.t -> string
