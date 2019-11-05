@@ -38,32 +38,37 @@ let drop_table name =
     raise Table_Not_Found
 
 let read (filename : string) : Table.t =
-  Table.empty
-(*
-  let handle = Unix.opendir dir 
-  in
-  (** [parse line] will parse a line into a string list. *)
-  let parse line = 
-    String.split_on_char ',' line 
-  in
-  (** [tbl_build handle] will add the header row and all the rows within
-    * the file associacted with [handle] and add it to a table. *)
-  let tbl_build handle =
-    let channel = open_in 
-let rec body init = 
 
-in
-in
-(** [tbl_find] will find the file associated with [filename] in 
-  * the parent function and call [tbl_build] to add all the contents to it. *)
-let rec tbl_find = 
-  let file = Unix.readdir handle in 
-  if file = (filename ^ ".txt") then  
-    (* if this is the file we are looking for *)
-    tbl_build file Table.empty
+  (* [row_builder vals header acc] is the row with values [vals] associated 
+   * with columns in [header]. *)
+  let rec row_builder vals header acc = 
+    assert (List.length vals <= List.length header); (* if else raise error *)
+    match vals with
+    | [] -> acc
+    | h::t -> row_builder t (List.tl header) (Row.add_column acc hh hv)
+    | _ -> failwith "vals and header lists not equal in row_builder. "
+  in
+  (* [table_builder c init] will copy each line in c to the table init. *)
+  let rec table_builder c header init = 
+    try  
+      let line = input_line c |> String.split_on_char ',' in 
+      table_builder c header 
+        (Table.insert_row init (row_builder line header Row.empty))
+    with
+    | End_of_file -> init
+  in
+
+  try (* attempt to open file, call [table_builder] if present. *)
+    let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
+    let header_row = input_line channel |> String.split_on_char ',' in
+    table_builder channel Table.empty header_row
+  with
+  | Sys_error _ -> raise Table_Not_Found
+
+let write name table =
+  let file = (dir ^ Filename.dir_sep ^ name) in
+  if Sys.file_exists file then
+    raise Table_Exists
   else
-    tbl_find in
-tbl_find
-*)
-let write (table : Table.t) : unit =
-  ()
+    let cols = table |> Table.get_header |> String.concat ' ' in 
+    create_table name cols
