@@ -4,6 +4,9 @@
 (** A [Table] containing rows and columns. *)
 type t
 
+(** [empty] is the empty table. *)
+val empty : t
+
 (** [insert_row t r] adds a row [r] to the end of a table [t] and returns a
     table [t'] with the added row. *)
 val insert_row : t -> Row.t -> t

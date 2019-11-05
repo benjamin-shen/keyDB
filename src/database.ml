@@ -38,7 +38,30 @@ let drop_table name =
     raise Table_Not_Found
 
 let read (filename : string) : Table.t =
-  failwith ""
+  let handle = Unix.opendir dir 
+  in
+  (** [parse line] will parse a line into a string list. *)
+  let parse line = 
+    String.split_on_char ',' line 
+  in
+  (** [tbl_build handle] will add the header row and all the rows within
+    * the file associacted with [handle] and add it to a table. *)
+  let tbl_build handle =
+    let channel = open_in 
+let rec body init = 
+
+in
+in
+(** [tbl_find] will find the file associated with [filename] in 
+  * the parent function and call [tbl_build] to add all the contents to it. *)
+let rec tbl_find = 
+  let file = Unix.readdir handle in 
+  if file = (filename ^ ".txt") then  
+    (* if this is the file we are looking for *)
+    tbl_build file Table.empty
+  else
+    tbl_find in
+tbl_find
 
 let write table =
   ()
