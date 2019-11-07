@@ -1,3 +1,6 @@
 1. Install and extract the contents of `keyDB.zip`
 2. Open the folder containing the extracted contents in your terminal
-3. Run `make dbms` and follow the instructions
+3. Run `make dbms`
+** As of MS1, only
+** the HELP, CREATE, DROP, and QUIT commands 
+** are fully implemented.

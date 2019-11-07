@@ -33,8 +33,11 @@ let get_column t c =
 let select t c =
   failwith "select"
 
-let add_column t c=
+let add_column t c =
   failwith "add_column"
 
-let remove_column t c=
+let remove_column t c =
   failwith "remove_column"
+
+let to_csv t =
+  "to_csv not implemented"
