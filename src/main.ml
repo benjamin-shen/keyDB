@@ -11,7 +11,7 @@ let rec run_dbms () =
     match command with
     | Help -> print_endline (Command.help ()); run_dbms ()
     | Log -> print_endline (Log.get_log ()); run_dbms ()
-    | Undo -> print_endline "Undo not implemented."; run_dbms ()
+    | Undo -> print_endline (Database.write "abc" (Database.read "abc")); run_dbms () (* TESTING PURPOSES *)
     | Create t -> begin 
         try print_endline (Database.create_table t.file t.cols)
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");

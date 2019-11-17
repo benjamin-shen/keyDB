@@ -1,8 +1,10 @@
 open OUnit2
 open Database
+open Table
 
 let database_tests = 
   [
+    "newline" >:: (fun _ -> print_newline (););
     "create drop table test" >:: (fun _ -> 
         (try ignore (create_table "test" ["t";"e";"st"]); ()
          with _ -> failwith "create");
@@ -26,12 +28,18 @@ let database_tests =
         (try ignore (create_table "test" ["t";"e";"st"]); ()
          with _ -> failwith "create");
 
+        ignore (drop_table "test");
       );
   ]
 
 let table_tests = 
   [
-    "name" >:: (fun _ -> ());
+    "newline" >:: (fun _ -> print_newline (););
+    "to_csv test" >:: (fun _ -> 
+        let row_a = Row.add_column (Row.empty) "col" "a" in
+        let t = insert_row (add_column Table.empty "col") row_a in
+        assert_equal (to_csv t) "col\n0,a";
+      );
   ]
 
 let row_tests = 

@@ -24,10 +24,10 @@ let create_table name cols =
   let file = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists file then
     raise Table_Exists
-  else begin
+  else
     ignore (Sys.command ("touch " ^ file));
-    ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" >> |} ^ file));
-    "Created table: " ^ name end
+  ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
+  "Created table: " ^ name
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in
@@ -61,14 +61,13 @@ let read (filename : string) : Table.t =
   try (* attempt to open file, call [table_builder] if present. *)
     let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
     let header = List.tl (input_line channel |> String.split_on_char ',') in
-    Table.set_header header;
     table_builder channel header Table.empty
   with
   | Sys_error _ -> raise Table_Not_Found
 
 let write filename table =
   let file = (dir ^ Filename.dir_sep ^ filename) in
-  if Sys.file_exists file then
-    raise Table_Exists
-  else
-    ""
+  let csv = Table.to_csv table in
+  ignore (Sys.command ("touch " ^ file));
+  ignore (Sys.command ("echo " ^ csv ^ " > " ^ file));
+  csv
