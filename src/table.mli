@@ -25,12 +25,12 @@ val remove_row : t -> int -> t
 
 (** [get_column t c] finds a column [col] in a table [t] and 
     returns the contents of that column. *)
-val get_column : t -> string -> string list
+val get_column : t -> string ->  string list
 
-(** [select t conditions] finds the rows in [t] that satisfy the conditions [c] and
+(** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
     returns a table containing these rows. 
     Raises: some error. *)
-val select : t -> string list -> t
+val select : t -> string -> string list -> t
 
 (** [add_column t c] adds a column [col] to the end of a table [t] and returns
     a table [t'] with the added column. *)

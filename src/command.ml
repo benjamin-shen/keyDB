@@ -7,6 +7,7 @@ type conditions = string list
 
 type table_command =
   | Select of column list*conditions
+  | SelectStar
   | Insert of value list
   | Remove of key list
   | Add    of column list
@@ -36,6 +37,7 @@ let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
 (* table commands *)
 let select = "IN [table] SELECT [cols] *? (WHERE [conditions])?"
+let selectStar = "IN [table] SELECT *"
 let insert = "IN [table] INSERT [vals]"
 let remove = "IN [table] REMOVE [keys]"
 let add = "IN [table] ADD [cols]"
@@ -70,7 +72,10 @@ let rec tail (input:string list) : object_phrase =
   | _::t -> t
 
 let select_where (input:string list) =
-  Select ([],[])
+  match input with
+  | [] -> failwith "no command phrase in select_where, not even *"
+  | h::t -> if h = "*" && (0 = (List.length t)) 
+    then SelectStar else Select ([],[])
 
 (** [table_command input] is the table command represented by [input]. *)
 let table_command (input:string list) : table_command =
@@ -101,7 +106,7 @@ let table_command (input:string list) : table_command =
   | _ -> failwith "Not a table command."
 
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .]+") "" str in
+  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .*]+") "" str in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 
@@ -137,6 +142,7 @@ let help () =
   "\nTable commands:\n" ^
   select ^ "\n  prints the rows and columns [cols] in [table] 
   that satisfy [conditions]. * is equivalent to all columns.\n" ^
+  selectStar ^ "\n prints all rows and columns in [table]. \n" ^
   insert ^ "\n  inserts a new row with [col] to [val] mappings.\n" ^
   remove ^ "\n  removes the row with key [key].\n" ^
   add ^ "\n  adds a new column [col].\n" ^

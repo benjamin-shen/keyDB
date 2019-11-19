@@ -63,7 +63,10 @@ let read (filename : string) : Table.t =
   try
     let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
     let header = List.tl (input_line channel |> String.split_on_char ',') in
-    table_builder channel header Table.empty
+    (* print_endline "table builder start"; *)
+    let result = table_builder channel header Table.empty in 
+    (* print_endline "table builder done"; *)
+    result
   with
   | Sys_error _ -> raise Table_Not_Found
 (*key,a,b,c
