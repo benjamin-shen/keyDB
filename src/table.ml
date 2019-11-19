@@ -60,7 +60,7 @@ let add_column t c =
 let remove_column t c =
   failwith "remove_column"
 
-(** [hasht_to_csv col hasht] converts a hashtable [hasht] to a csv string, 
+(** [map_to_csv col map] converts a map [map] to a csv string, 
     ordered by string list [col]. *)
 let rec hasht_to_csv col hasht = 
   match col with
@@ -77,8 +77,8 @@ let rec string_rows tab =
   let col = tab.columns in
   match tab.table with
   | [] -> ""
-  | h::t -> let tail = string_rows {columns = col; 
-                                    table = List.tl tab.table} in
+  | h::t -> let tail = string_rows {columns = col;
+                                    table = t} in
     string_row (fst h) (snd h) col ^ (if tail="" then "" else "\n") ^ tail
 
 (** [list_to_csv] converts a list to a csv string. *)

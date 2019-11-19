@@ -1,4 +1,5 @@
 open Hashtbl
+open Row
 
 type key = int
 type column = string
@@ -50,10 +51,11 @@ let rec row_builder vals header acc =
 (** [table_builder c header acc] will copy each line in [c] to the table [acc]. *)
 let rec table_builder c header acc = 
   try  
-    let line = input_line c |> String.split_on_char ',' in 
-    table_builder c header 
-      (Table.read_insert_row acc (int_of_string (List.hd line)) 
-         (row_builder (List.tl line) header Row.empty))
+    let line = input_line c |> String.trim |> String.split_on_char ',' in 
+    if line=[""] then table_builder c header acc else
+      table_builder c header 
+        (Table.read_insert_row acc (int_of_string (List.hd line)) 
+           (row_builder (List.tl line) header Row.empty))
   with
   | End_of_file -> Table.set_columns acc header
 
@@ -71,7 +73,7 @@ let read (filename : string) : Table.t =
 
 let write filename table =
   let file = dir ^ Filename.dir_sep ^ filename in
-  let csv = Table.to_csv table in
+  let csv = String.trim (Table.to_csv table) in
   ignore (Sys.command ("touch " ^ file));
   ignore (Sys.command ("echo " ^ "\"" ^ csv ^ "\"" ^ " > " ^ file));
   csv
