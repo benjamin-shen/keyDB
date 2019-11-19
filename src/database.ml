@@ -50,10 +50,13 @@ let rec row_builder vals header acc =
 (** [table_builder c header acc] will copy each line in [c] to the table [acc]. *)
 let rec table_builder c header acc = 
   try  
-    let line = input_line c |> String.split_on_char ',' in 
-    table_builder c header 
-      (Table.read_insert_row acc (int_of_string (List.hd line)) 
-         (row_builder (List.tl line) header Row.empty))
+    let line1 = input_line c in 
+    (* print_endline line1; *)
+    let line = line1 |> String.split_on_char ',' in
+    if line = [""] then table_builder c header acc else
+      table_builder c header 
+        (Table.read_insert_row acc (int_of_string (List.hd line)) 
+           (row_builder (List.tl line) header Row.empty))
   with
   | End_of_file -> Table.set_columns acc header
 
@@ -61,7 +64,10 @@ let read (filename : string) : Table.t =
   try
     let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
     let header = List.tl (input_line channel |> String.split_on_char ',') in
-    table_builder channel header Table.empty
+    (* print_endline "table builder start"; *)
+    let result = table_builder channel header Table.empty in 
+    (* print_endline "table builder done"; *)
+    result
   with
   | Sys_error _ -> raise Table_Not_Found
 (*key,a,b,c
@@ -71,7 +77,7 @@ let read (filename : string) : Table.t =
 
 let write filename table =
   let file = dir ^ Filename.dir_sep ^ filename in
-  let csv = Table.to_csv table in
+  let csv = String.trim (Table.to_csv table )in
   ignore (Sys.command ("touch " ^ file));
   ignore (Sys.command ("echo " ^ "\"" ^ csv ^ "\"" ^ " > " ^ file));
   csv

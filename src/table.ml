@@ -3,6 +3,8 @@ type column = string
 type value = string
 type condition = string
 
+exception Invalid_Column
+
 (** AF: An association list mapping keys to rows, that 
     represents a database table.
   * RI: TODO *)
@@ -46,10 +48,18 @@ let remove_row t k =
   }
 
 let get_column t c =
-  failwith "get_column"
+  if not (List.mem c t.columns) then raise Invalid_Column else
+    let rec table_builder acc = function
+      | [] -> acc
+      | (k, row)::t -> (k, Row.value row c)::acc
+    in table_builder [] t.table
 
-let select t c =
-  failwith "select"
+let select t c f =
+  let col = get_column t c in
+  try
+    failwith ""
+  with
+    x -> failwith "exception occured"
 
 let add_column t c =
   {
@@ -88,4 +98,6 @@ let rec list_to_csv = function
     h ^ (if tail="" then "" else ",") ^ tail
 
 let to_csv t =
-  "key," ^ list_to_csv t.columns ^ "\n" ^ (string_rows t)
+  let r = "key," ^ list_to_csv t.columns ^ "\n" ^ (string_rows t) in
+  (* print_endline r;  *)
+  r

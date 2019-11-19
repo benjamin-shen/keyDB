@@ -16,4 +16,4 @@ val add_column : t -> string -> string -> t
 val update : t -> string -> string -> t
 
 (** [to_hasht r] converts row [r] to a hashtable. *)
-val to_hasht : t -> (string, string) Hashtbl.t
+val to_hasht : t -> (string, string) Hashtbl.t 

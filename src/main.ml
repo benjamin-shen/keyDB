@@ -9,9 +9,11 @@ let rec run_dbms () =
           print_endline {|Run "make clean" to delete all stored data.|}; exit 0) 
     else print_newline ();
     match command with
+    | Quit -> failwith "should be handled"
     | Help -> print_endline (Command.help ()); run_dbms ()
     | Log -> print_endline (Log.get_log ()); run_dbms ()
-    | Undo -> print_endline (Database.write "abc" (Database.read "abc")); run_dbms () (* TESTING PURPOSES *)
+    (* TESTING PURPOSES *)
+    | Undo -> ignore (Database.write "abc" (Database.read "abc")); run_dbms () 
     | Create t -> begin 
         try print_endline (Database.create_table t.file t.cols)
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
@@ -21,7 +23,32 @@ let rec run_dbms () =
         try print_endline (Database.drop_table t)
         with _ -> print_endline ("Table " ^ t ^ " does not exist.")
       end; run_dbms ()
-    | _ -> print_endline "Command not implemented."; run_dbms ()
+    | In (file, Select (cols, conditions)) -> print_endline "select no star"; 
+      run_dbms ()
+    | In (file, SelectStar) -> print_endline "select star"; 
+      file |> Database.read |> Table.to_csv |> print_endline; run_dbms ()
+
+
+    (* *************************** UNIMPLEMENTED *************************** *)
+    (* ********************************************************************* *)
+    | In (file, Insert _) -> print_endline "Insert not implemented."; 
+      run_dbms ()
+    | In (file, Remove _) -> print_endline "Remove not implemented."; 
+      run_dbms ()
+    | In (file, Add _) -> print_endline "Add not implemented."; 
+      run_dbms ()
+    | In (file, Delete _) -> print_endline "Delete not implemented."; 
+      run_dbms ()
+    | In (file, Update _) -> print_endline "Update not implemented."; 
+      run_dbms ()
+    | In (file, Sum _) -> print_endline "Sum not implemented."; 
+      run_dbms ()
+    | In (file, Count _) -> print_endline "Count not implemented."; 
+      run_dbms ()
+    | In (file, Count_Null _) -> print_endline "Count_null not implemented."; 
+      run_dbms ()
+
+  (* | _ -> print_endline "Command not implemented."; run_dbms () *)
   with 
   | Command.Empty ->
     print_newline ();
