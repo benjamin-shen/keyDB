@@ -70,25 +70,17 @@ let add_column t c =
 let remove_column t c =
   failwith "remove_column"
 
-(** [hasht_to_csv col hasht] converts a hashtable [hasht] to a csv string, 
-    ordered by string list [col]. *)
-let rec hasht_to_csv col hasht = 
-  match col with
-  | [] -> ""
-  | h::t -> let tail = hasht_to_csv t hasht in 
-    Hashtbl.find hasht h ^ (if tail="" then "" else ",") ^ tail
-
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
-  string_of_int k ^ "," ^ hasht_to_csv col (Row.to_hasht r)
+  string_of_int k ^ "," ^ Row.to_csv r
 
 (** [string_rows tab] converts the rows of a table to a string. *)
 let rec string_rows tab = 
   let col = tab.columns in
   match tab.table with
   | [] -> ""
-  | h::t -> let tail = string_rows {columns = col; 
-                                    table = List.tl tab.table} in
+  | h::t -> let tail = string_rows {columns = col;
+                                    table = t} in
     string_row (fst h) (snd h) col ^ (if tail="" then "" else "\n") ^ tail
 
 (** [list_to_csv] converts a list to a csv string. *)
