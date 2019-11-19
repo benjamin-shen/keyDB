@@ -5,7 +5,10 @@ type t
 (** [empty] is the empty table. *)
 val empty : t
 
-(** [get_header] returns the header's contents. *)
+(** [set_header t c] sets table [t]'s columns to [c]. *)
+val set_columns : t -> string list -> t
+
+(** [get_columns t] returns table [t]'s columns. *)
 val get_columns : t -> string list
 
 (** [read_insert_row t k r] adds a row [r] with key [k] to the end of a table [t]

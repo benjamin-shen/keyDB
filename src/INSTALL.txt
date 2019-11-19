@@ -1,4 +1,4 @@
-1. Install and extract the contents of `keyDB.zip`
+1. Install `src.zip` and extract its contents
 2. Open the folder containing the extracted contents in your terminal
 3. Run `make dbms`
 ** As of MS1, only

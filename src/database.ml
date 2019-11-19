@@ -43,8 +43,8 @@ let rec row_builder vals header acc =
   if (List.length vals <= List.length header) then
     match vals with
     | [] -> acc
-    | h::t -> row_builder t (List.tl header) 
-                (Row.add_column acc (List.hd header) h)
+    | h::t -> 
+      row_builder t (List.tl header) (Row.add_column acc (List.hd header) h)
   else failwith "Value list is too long."
 
 (** [table_builder c header acc] will copy each line in [c] to the table [acc]. *)
@@ -55,19 +55,23 @@ let rec table_builder c header acc =
       (Table.read_insert_row acc (int_of_string (List.hd line)) 
          (row_builder (List.tl line) header Row.empty))
   with
-  | End_of_file -> acc
+  | End_of_file -> Table.set_columns acc header
 
 let read (filename : string) : Table.t =
-  try (* attempt to open file, call [table_builder] if present. *)
+  try
     let channel = open_in (dir ^ Filename.dir_sep ^ filename) in
     let header = List.tl (input_line channel |> String.split_on_char ',') in
     table_builder channel header Table.empty
   with
   | Sys_error _ -> raise Table_Not_Found
+(*key,a,b,c
+  0,0a,0b,0c
+  1,1a,1b,1c
+  2,2a,2b,2c*)
 
 let write filename table =
-  let file = (dir ^ Filename.dir_sep ^ filename) in
+  let file = dir ^ Filename.dir_sep ^ filename in
   let csv = Table.to_csv table in
   ignore (Sys.command ("touch " ^ file));
-  ignore (Sys.command ("echo " ^ csv ^ " > " ^ file));
+  ignore (Sys.command ("echo " ^ "\"" ^ csv ^ "\"" ^ " > " ^ file));
   csv

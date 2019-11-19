@@ -18,12 +18,17 @@ let empty = {
   table = []
 }
 
+let set_columns t c = {
+  columns = c;
+  table = t.table;
+}
+
 let get_columns t = t.columns
 
 let read_insert_row t k r =
   {
     columns = t.columns;
-    table = (k,r)::t.table
+    table = t.table @ [(k,r)]
   }
 
 let key = ref 0
@@ -31,7 +36,7 @@ let insert_row t r =
   key := List.length t.table;
   {
     columns = t.columns;
-    table = (!key,r)::t.table
+    table = t.table @ [(!key,r)]
   }
 
 let remove_row t k =
@@ -48,7 +53,7 @@ let select t c =
 
 let add_column t c =
   {
-    columns = List.rev (c::(List.rev t.columns));
+    columns = t.columns @ [c];
     table = t.table;
   }
 
@@ -80,7 +85,7 @@ let rec string_rows tab =
 let rec list_to_csv = function
   | [] -> ""
   | h::t -> let tail = list_to_csv t in 
-    h ^ (if tail="" then "" else ",")
+    h ^ (if tail="" then "" else ",") ^ tail
 
 let to_csv t =
-  list_to_csv t.columns ^ "\n" ^ (string_rows t)
+  "key," ^ list_to_csv t.columns ^ "\n" ^ (string_rows t)
