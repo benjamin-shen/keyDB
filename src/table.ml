@@ -60,17 +60,9 @@ let add_column t c =
 let remove_column t c =
   failwith "remove_column"
 
-(** [map_to_csv col map] converts a map [map] to a csv string, 
-    ordered by string list [col]. *)
-let rec hasht_to_csv col hasht = 
-  match col with
-  | [] -> ""
-  | h::t -> let tail = hasht_to_csv t hasht in 
-    Hashtbl.find hasht h ^ (if tail="" then "" else ",") ^ tail
-
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
-  string_of_int k ^ "," ^ hasht_to_csv col (Row.to_hasht r)
+  string_of_int k ^ "," ^ Row.to_csv r
 
 (** [string_rows tab] converts the rows of a table to a string. *)
 let rec string_rows tab = 

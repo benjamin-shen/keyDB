@@ -39,9 +39,8 @@ let table_tests =
         let row_a = Row.add_column (Row.empty) "col" "a" in
         let row_b = Row.add_column (Row.empty) "col" "b" in
         let t = insert_row (add_column Table.empty "col") row_a in
-        print_endline (to_csv t);
         assert_equal (to_csv t) "key,col\n0,a";
-        print_endline (to_csv (insert_row (add_column t "col") row_b));
+        assert_equal (to_csv (insert_row t row_b)) "key,col\n0,a\n1,b";
       );
   ]
 

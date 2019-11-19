@@ -1,11 +1,17 @@
-type t = (string, string) Hashtbl.t
+type t = (string * string) list
 
-let empty = Hashtbl.create 10
+let empty = []
 
-let value r c = Hashtbl.find r c
+let value r c = List.assoc c r
 
-let add_column r c v = Hashtbl.add r c v; r
+let add_column r c v = r @ [(c,v)]
 
-let update r c v = Hashtbl.replace r c v; r
+let rec update r c v = match r with
+  | [] -> []
+  | h::t -> if (fst h)=c then (c,v)::update t c v else h::update t c v
 
-let to_hasht r = r
+let rec to_csv r = 
+  match r with
+  | [] -> ""
+  | (_,h)::t -> let tail = to_csv t in 
+    h ^ (if tail="" then "" else ",") ^ tail

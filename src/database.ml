@@ -52,7 +52,7 @@ let rec row_builder vals header acc =
 let rec table_builder c header acc = 
   try  
     let line = input_line c |> String.trim |> String.split_on_char ',' in 
-    if line=[""] then table_builder c header acc else
+    if line=[""] then table_builder c header acc else 
       table_builder c header 
         (Table.read_insert_row acc (int_of_string (List.hd line)) 
            (row_builder (List.tl line) header Row.empty))
