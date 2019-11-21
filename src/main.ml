@@ -27,19 +27,25 @@ let rec run_dbms () =
       run_dbms ()
     | In (file, SelectStar) -> print_endline "select star"; 
       file |> Database.read |> Table.to_csv |> print_endline; run_dbms ()
-
+    | In (file, Insert vals) -> print_endline "Insert row"; 
+      let table = file |> Database.read in 
+      vals |> Row.build_row (Table.get_columns table) |> Table.insert_row table
+      |> Database.write file |> print_endline;
+      run_dbms ()
+    | In (file, Remove keys) -> print_endline "Remove";
+      let table = file |> Database.read in
+      Table.remove_rows table keys |> Database.write file |> print_endline;
+      run_dbms ()
+    | In (file, Update kcv) -> print_endline "Update"; 
+      let table = file |> Database.read in
+      Table.update_cell table kcv.key kcv.col kcv.value |> Database.write file
+      |> print_endline; run_dbms ()
 
     (* *************************** UNIMPLEMENTED *************************** *)
     (* ********************************************************************* *)
-    | In (file, Insert _) -> print_endline "Insert not implemented."; 
-      run_dbms ()
-    | In (file, Remove _) -> print_endline "Remove not implemented."; 
-      run_dbms ()
     | In (file, Add _) -> print_endline "Add not implemented."; 
       run_dbms ()
     | In (file, Delete _) -> print_endline "Delete not implemented."; 
-      run_dbms ()
-    | In (file, Update _) -> print_endline "Update not implemented."; 
       run_dbms ()
     | In (file, Sum _) -> print_endline "Sum not implemented."; 
       run_dbms ()

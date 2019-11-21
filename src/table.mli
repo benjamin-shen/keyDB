@@ -23,9 +23,18 @@ val insert_row : t -> Row.t -> t
     table without the specified row. *)
 val remove_row : t -> int -> t
 
-(** [get_column t c] finds a column [col] in a table [t] and 
-    returns the contents of that column. *)
-val get_column : t -> string ->  string list
+(** [insert_rows t k] will remove rows in [t] associated with the keys [k]. *)
+val remove_rows : t -> int list -> t
+
+(** [get_column t c] finds a column [c] in a table [t] and 
+    returns the contents of that column. 
+    Raises: Invalid_Column if [c] is not a column in table [t]. *)
+val get_column : t -> string -> (int * string) list
+
+(** [update_cell t k c v] will update the cell in [t] at key [k] and column [c]
+    to value [v]. 
+    Raises: Invalid_Key if [k] is not a valid key in table [t]. *)
+val update_cell : t -> int -> string -> string -> t
 
 (** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
     returns a table containing these rows. 
