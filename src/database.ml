@@ -1,6 +1,3 @@
-open Hashtbl
-open Row
-
 type key = int
 type column = string
 type value = string
