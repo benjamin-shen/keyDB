@@ -12,8 +12,7 @@ let rec run_dbms () =
     | Quit -> failwith "should be handled"
     | Help -> print_endline (Command.help ()); run_dbms ()
     | Log -> print_endline (Log.get_log ()); run_dbms ()
-    (* TESTING PURPOSES *)
-    | Undo -> ignore (Database.write "abc" (Database.read "abc")); run_dbms () 
+    | Undo -> print_endline "undo not implemented"; run_dbms () 
     | Create t -> begin 
         try print_endline (Database.create_table t.file t.cols)
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
@@ -23,20 +22,20 @@ let rec run_dbms () =
         try print_endline (Database.drop_table t)
         with _ -> print_endline ("Table " ^ t ^ " does not exist.")
       end; run_dbms ()
-    | In (file, Select (cols, conditions)) -> print_endline "select no star"; 
-      run_dbms ()
-    | In (file, SelectStar) -> print_endline "select star"; 
+    | In (file, Select (cols, conditions)) -> 
+      print_endline "select not implemented"; run_dbms ()
+    | In (file, SelectStar) ->
       file |> Database.read |> Table.to_csv |> print_endline; run_dbms ()
-    | In (file, Insert vals) -> print_endline "Insert row"; 
+    | In (file, Insert vals) ->
       let table = file |> Database.read in 
       vals |> Row.build_row (Table.get_columns table) |> Table.insert_row table
       |> Database.write file |> print_endline;
       run_dbms ()
-    | In (file, Remove keys) -> print_endline "Remove";
+    | In (file, Remove keys) ->
       let table = file |> Database.read in
       Table.remove_rows table keys |> Database.write file |> print_endline;
       run_dbms ()
-    | In (file, Update kcv) -> print_endline "Update"; 
+    | In (file, Update kcv) ->
       let table = file |> Database.read in
       Table.update_cell table kcv.key kcv.col kcv.value |> Database.write file
       |> print_endline; run_dbms ()

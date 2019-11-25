@@ -1,6 +1,15 @@
 1. Install `src.zip` and extract its contents
 2. Open the folder containing the extracted contents in your terminal
 3. Run `make dbms`
-** As of MS1, only
-** the HELP, CREATE, DROP, and QUIT commands 
-** are fully implemented.
+
+
+** As of MS2, Database.read and Database.write have been fully implemented.
+** Only certain dbms functions have been fully implemented.
+** To see what we demoed, you can type:
+  `help`
+  `create abc a b c`
+  `in abc select *`
+  `in abc insert 0a 0b 0c`
+  `in abc insert 1a 1b 1c`
+  `drop abc`
+  `quit`
