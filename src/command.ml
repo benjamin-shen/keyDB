@@ -144,7 +144,7 @@ let help () =
   select ^ "\n  prints the rows and columns [cols] in [table] 
   that satisfy [conditions]. * is equivalent to all columns.\n" ^
   insert ^ "\n  inserts a new row with [col] to [val] mappings.\n" ^
-  remove ^ "\n  removes the row with key [key].\n" ^
+  remove ^ "\n  removes the rows with keys [keys].\n" ^
   add ^ "\n  adds new columns [cols].\n" ^
   delete ^ "\n  deletes columns [cols].\n" ^
   update ^ "\n  updates the [col] mapping to [val] 
