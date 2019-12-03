@@ -72,11 +72,40 @@ let rec tail (input:string list) : object_phrase =
   | [] -> []
   | _::t -> t
 
+let str_to_op = function 
+    "<" -> LT | "<=" -> LTE | "=" -> EQ |
+    ">" -> GT | ">=" -> GTE | "!=" -> NE |
+    _ -> failwith "list to cond"(* raise (Malformed "Invalid operator. Must be: < <= = > >= !=")*)
+
+let rec list_to_conditions acc = function
+  | [] -> acc
+  | col::op::value::[] -> (col, str_to_op op, value)::acc
+  | col::op::value::t -> list_to_conditions ((col, str_to_op op, value)::acc) t
+  | x::t -> print_endline (List.length (x::t) |> string_of_int); 
+    print_endline (x); print_endline (List.hd t); 
+    failwith "list to cond 2" (* raise (Malformed "Invalid number of conditions, must be multiple of 3") *)
+
 let select_where (input:string list) =
   match input with
   | [] -> failwith "no command phrase in select_where, not even *"
-  | h::t -> if h = "*" && (0 = (List.length t)) 
-    then SelectStar else Select ([],[])
+  | h::t -> 
+    if h = "*" && (0 = (List.length t)) then SelectStar 
+    (* else Select ([],[]) *)
+    else
+      let rec select_builder acc boolcol = function
+        | [] -> acc
+        | h::t -> 
+          if h = "where" then 
+            select_builder acc false t
+          else match acc with
+            | Select (cols, conditions) -> 
+              if boolcol then 
+                select_builder (Select ((h::cols), conditions)) true t
+              else 
+                let conds = list_to_conditions [] (h::t) in
+                (Select (cols, conds)) 
+            | _ -> failwith "not select"
+      in select_builder (Select ([],[])) true (h::t)
 
 (** [table_command input] is the table command represented by [input]. *)
 let table_command (input:string list) : table_command =
@@ -107,7 +136,7 @@ let table_command (input:string list) : table_command =
   | _ -> failwith "Not a table command."
 
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .*]+") "" str in
+  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .*<]+") "" str in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 
@@ -134,7 +163,8 @@ let parse str =
       | _ -> failwith "Not a command."
   with 
   | Empty -> raise Empty
-  | _ -> raise (Malformed failure)
+  | Malformed x -> failwith "mal"
+(* | _ -> raise (Malformed failure) *)
 
 let help () =
   "Database commands:\n" ^
