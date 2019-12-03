@@ -163,8 +163,7 @@ let parse str =
       | _ -> failwith "Not a command."
   with 
   | Empty -> raise Empty
-  | Malformed x -> failwith "mal"
-(* | _ -> raise (Malformed failure) *)
+  | _ -> raise (Malformed failure)
 
 let help () =
   "Database commands:\n" ^
