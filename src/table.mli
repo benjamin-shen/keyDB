@@ -41,14 +41,14 @@ val update_cell : t -> int -> string -> string -> t
     Raises: some error. *)
 val select : t -> string -> string list -> t
 
-(** [add_column t c] adds a column [col] to the end of a table [t] and returns
-    a table [t'] with the added column. *)
-val add_column : t -> string -> t
+(** [add_columns t c] adds columns [cols] to the end of a table [t] and returns
+    a table with the specified columns. *)
+val add_columns : t -> string list -> t
 
-(** [remove_column t c] removes a column [col] from a table [t] and returns 
-    a table without the specified column. 
+(** [delete_columns t c] removes columns [cols] from a table [t] and returns 
+    a table without the specified columns. 
     Raises: some error. *)
-val remove_column : t -> string -> t
+val delete_columns : t -> string list -> t
 
 (** [to_csv t] converts table [t] into a csv string *)
 val to_csv : t -> string

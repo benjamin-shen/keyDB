@@ -37,7 +37,6 @@ let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
 (* table commands *)
 let select = "IN [table] SELECT [cols] *? (WHERE [conditions])?"
-let selectStar = "IN [table] SELECT *"
 let insert = "IN [table] INSERT [vals]"
 let remove = "IN [table] REMOVE [keys]"
 let add = "IN [table] ADD [cols]"
@@ -142,14 +141,13 @@ let help () =
   "\nTable commands:\n" ^
   select ^ "\n  prints the rows and columns [cols] in [table] 
   that satisfy [conditions]. * is equivalent to all columns.\n" ^
-  selectStar ^ "\n prints all rows and columns in [table]. \n" ^
   insert ^ "\n  inserts a new row with [col] to [val] mappings.\n" ^
   remove ^ "\n  removes the row with key [key].\n" ^
-  add ^ "\n  adds a new column [col].\n" ^
-  delete ^ "\n  deletes the column [col].\n" ^
+  add ^ "\n  adds new columns [cols].\n" ^
+  delete ^ "\n  deletes columns [cols].\n" ^
   update ^ "\n  updates the [col] mapping to [val] 
   in the row with key [key].\n" ^
-  sum ^ "\n  sums [col], if possible.\n" ^
+  sum ^ "\n  sums [col] if its values are of type int or float.\n" ^
   count ^ "\n  counts the number of non-null cells in [col].\n" ^
   count_null ^ "\n  counts the number of null cells in [col].\n" ^
   "\nOther commands:\n" ^

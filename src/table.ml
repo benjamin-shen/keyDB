@@ -84,15 +84,15 @@ let select t c f =
   with
     x -> failwith "exception occured"
 
-let add_column t c =
+let add_columns t c =
   {
     key = t.key;
-    columns = t.columns @ [c];
+    columns = t.columns @ c;
     table = t.table;
   }
 
-let remove_column t c =
-  failwith "remove_column"
+let delete_columns t c =
+  failwith "delete_columns"
 
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
