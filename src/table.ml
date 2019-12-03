@@ -33,7 +33,7 @@ let get_columns t = t.columns
 
 let read_insert_row t k r =
   {
-    key = t.key + 1;
+    key = k;
     columns = t.columns;
     table = t.table @ [(k,r)]
   }

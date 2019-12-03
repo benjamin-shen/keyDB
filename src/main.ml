@@ -22,23 +22,59 @@ let rec run_dbms () =
         try print_endline (Database.drop_table t)
         with _ -> print_endline ("Table " ^ t ^ " does not exist.")
       end; run_dbms ()
-    | In (file, Select (cols, conditions)) -> 
-      print_endline "select not implemented"; run_dbms ()
-    | In (file, SelectStar) ->
-      file |> Database.read |> Table.to_csv |> print_endline; run_dbms ()
-    | In (file, Insert vals) ->
-      let table = file |> Database.read in 
-      vals |> Row.build_row (Table.get_columns table) |> Table.insert_row table
-      |> Database.write file |> print_endline;
-      run_dbms ()
-    | In (file, Remove keys) ->
-      let table = file |> Database.read in
-      Table.remove_rows table keys |> Database.write file |> print_endline;
-      run_dbms ()
-    | In (file, Update kcv) ->
-      let table = file |> Database.read in
-      Table.update_cell table kcv.key kcv.col kcv.value |> Database.write file
-      |> print_endline; run_dbms ()
+    | In (file, Select (cols, conditions)) -> begin
+        try 
+          print_endline "select not implemented"; run_dbms ()
+        with 
+        | Database.Table_Not_Found -> 
+          print_endline "Table not found";
+          run_dbms () end
+    | In (file, SelectStar) -> begin
+        try 
+          file 
+          |> Database.read 
+          |> Table.to_csv 
+          |> print_endline; 
+          run_dbms ()
+        with 
+        | Database.Table_Not_Found -> 
+          print_endline "Table not found"; 
+          run_dbms () end
+    | In (file, Insert vals) -> begin 
+        try
+          let table = Database.read file in 
+          vals 
+          |> Row.build_row (Table.get_columns table) 
+          |> Table.insert_row table
+          |> Database.write file 
+          |> print_endline;
+          run_dbms ()
+        with 
+        | Database.Table_Not_Found -> 
+          print_endline "Table not found";
+          run_dbms () end
+    | In (file, Remove keys) -> begin
+        try
+          let table = Database.read file in
+          Table.remove_rows table keys 
+          |> Database.write file 
+          |> print_endline;
+          run_dbms () 
+        with 
+        | Database.Table_Not_Found -> 
+          print_endline "Table not found"; 
+          run_dbms () end
+    | In (file, Update kcv) -> begin
+        try 
+          let table = Database.read file in
+          Table.update_cell table kcv.key kcv.col kcv.value 
+          |> Database.write file
+          |> print_endline; 
+          run_dbms ()
+        with 
+        | Database.Table_Not_Found ->
+          print_endline "Table not found";
+          run_dbms () end
 
     (* *************************** UNIMPLEMENTED *************************** *)
     (* ********************************************************************* *)
