@@ -3,7 +3,9 @@ type filename = string
 type key = int
 type column = string
 type value = string
-type conditions = string list
+type operator = LT | LTE | EQ | NE | GT | GTE 
+type condition = (column * operator * value)
+type conditions = condition list
 
 type table_command =
   | Select of column list*conditions

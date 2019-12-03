@@ -16,7 +16,9 @@ type filename = string
 type key = int
 type column = string
 type value = string
-type conditions = string list
+type operator = LT | LTE | EQ | NE | GT | GTE 
+type condition = (column * operator * value)
+type conditions = condition list
 
 (** The type [table_command] represents a user command that is 
     operated on a particular table. *)
