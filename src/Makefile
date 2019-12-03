@@ -12,6 +12,7 @@ default: build
 build:
 	$(OCAMLBUILD) $(OBJECTS)
 	mkdir -p databases
+	mkdir -p backup
 	touch log.txt
 
 test: build
@@ -38,4 +39,4 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private keyDB.zip databases
+	rm -rf doc.public doc.private keyDB.zip databases backup log.txt

@@ -2,6 +2,7 @@
 doc.private
 keyDB.zip
 databases
+backup
 log.txt
 
 # ocaml

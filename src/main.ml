@@ -1,3 +1,9 @@
+(** [list_to_string lst] converts string list [lst] to a string with a space
+    separating each element. *)
+let rec list_to_string = function
+  | [] -> ""
+  | h::t -> h ^ " " ^ (list_to_string t)
+
 (** [run_dbms] runs the DBMS. *)
 let rec run_dbms () =
   print_newline ();
@@ -5,41 +11,46 @@ let rec run_dbms () =
   try
     let command = read_line () |> Command.parse in
     if command = Quit 
-    then (print_newline (); print_string "Log cleared. ";
+    then (print_newline (); 
+          Log.clear (); print_string "Log cleared. ";
           print_endline {|Run "make clean" to delete all stored data.|}; exit 0) 
     else print_newline ();
     match command with
     | Quit -> failwith "should be handled"
     | Help -> print_endline (Command.help ()); run_dbms ()
-    | Log -> print_endline (Log.get_log ()); run_dbms ()
-    | Undo -> print_endline "undo not implemented"; run_dbms () 
+    | Log -> let log = Log.get_log () in
+      if log = "" then print_endline "Log is empty."
+      else print_endline log; run_dbms ()
+    | Undo -> print_endline (Log.undo ()); run_dbms () 
     | Create t -> begin 
-        try print_endline (Database.create_table t.file t.cols)
+        try print_endline (Database.create_table t.file t.cols);
+          Log.write_log ("create " ^ t.file ^ " " ^ (list_to_string t.cols))
         with _ -> print_string ("Table " ^ t.file ^ " already exists. ");
           print_endline ({|To overwrite it, first do "drop |} ^ t.file ^ {|".|})
       end; run_dbms ()
     | Drop t -> begin
-        try print_endline (Database.drop_table t)
-        with _ -> print_endline ("Table " ^ t ^ " does not exist.")
+        try print_endline (Database.drop_table t);
+          Log.write_log ("drop " ^ t)
+        with _ -> 
+          print_endline ("Table " ^ t ^ " does not exist.")
       end; run_dbms ()
     | In (file, Select (cols, conditions)) -> begin
         try 
-          print_endline "select not implemented"; run_dbms ()
+          print_endline "select not implemented"
         with 
         | Database.Table_Not_Found -> 
-          print_endline "Table not found";
-          run_dbms () end
+          print_endline "Table not found"
+      end; run_dbms ()
     | In (file, SelectStar) -> begin
         try 
           file 
           |> Database.read 
           |> Table.to_csv 
-          |> print_endline; 
-          run_dbms ()
+          |> print_endline;
         with 
         | Database.Table_Not_Found -> 
-          print_endline "Table not found"; 
-          run_dbms () end
+          print_endline "Table not found"
+      end; run_dbms ()
     | In (file, Insert vals) -> begin 
         try
           let table = Database.read file in 
@@ -48,33 +59,35 @@ let rec run_dbms () =
           |> Table.insert_row table
           |> Database.write file 
           |> print_endline;
-          run_dbms ()
+          Log.write_log ("in " ^ file ^ " insert " ^ (list_to_string vals))
         with 
         | Database.Table_Not_Found -> 
-          print_endline "Table not found";
-          run_dbms () end
+          print_endline "Table not found"
+      end; run_dbms ()
     | In (file, Remove keys) -> begin
         try
           let table = Database.read file in
           Table.remove_rows table keys 
           |> Database.write file 
           |> print_endline;
-          run_dbms () 
+          Log.write_log ("in " ^ file ^ " remove " ^ 
+                         (keys |> List.map string_of_int |> list_to_string))
         with 
         | Database.Table_Not_Found -> 
-          print_endline "Table not found"; 
-          run_dbms () end
-    | In (file, Update kcv) -> begin
+          print_endline "Table not found"
+      end; run_dbms ()
+    | In (file, Update {key=k;col=c;value=v}) -> begin
         try 
           let table = Database.read file in
-          Table.update_cell table kcv.key kcv.col kcv.value 
+          Table.update_cell table k c v
           |> Database.write file
-          |> print_endline; 
-          run_dbms ()
+          |> print_endline;
+          Log.write_log
+            ("in " ^ file ^ " update " ^ (string_of_int k) ^ " " ^ c ^ " " ^ v)
         with 
         | Database.Table_Not_Found ->
-          print_endline "Table not found";
-          run_dbms () end
+          print_endline "Table not found"
+      end; run_dbms ()
 
     (* *************************** UNIMPLEMENTED *************************** *)
     (* ********************************************************************* *)
