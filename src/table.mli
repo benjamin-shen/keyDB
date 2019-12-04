@@ -36,6 +36,9 @@ val get_column : t -> string -> (int * string) list
     Raises: Invalid_Key if [k] is not a valid key in table [t]. *)
 val update_cell : t -> int -> string -> string -> t
 
+(** [select_all t] is the entire table [t]. *)
+val select_all : t -> t
+
 (** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
     returns a table containing these rows. 
     Raises: some error. *)
@@ -49,6 +52,16 @@ val add_columns : t -> string list -> t
     a table without the specified columns. 
     Raises: some error. *)
 val delete_columns : t -> string list -> t
+
+(** [sum_column t c] sums column [col] in table [t] if each value are of
+    type int or float. *)
+val sum_column : t -> string -> string
+
+(** [count t c] counts the non-null values of column [col] in table [t]. *)
+val count : t -> string -> string
+
+(** [count_null t c] counts the null values of column [col] in table [t]. *)
+val count_null : t -> string -> string
 
 (** [to_csv t] converts table [t] into a csv string *)
 val to_csv : t -> string

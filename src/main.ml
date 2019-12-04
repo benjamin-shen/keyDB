@@ -45,6 +45,7 @@ let rec run_dbms () =
         try 
           file 
           |> Database.read 
+          |> Table.select_all
           |> Table.to_csv 
           |> print_endline;
         with 
@@ -76,7 +77,9 @@ let rec run_dbms () =
         | Database.Table_Not_Found -> 
           print_endline "Table not found"
       end; run_dbms ()
-    | In (file, Update {key=k;col=c;value=v}) -> begin
+    | In (file, Update {key=k;
+                        col=c;
+                        value=v}) -> begin
         try 
           let table = Database.read file in
           Table.update_cell table k c v

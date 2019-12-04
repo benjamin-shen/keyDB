@@ -63,8 +63,6 @@ let get_column t c =
       | (k, row)::t -> (k, Row.value row c)::acc
     in table_builder [] t.table
 
-
-
 let update_cell t k c v = 
   if not (List.mem_assoc k t.table) 
   then raise (Invalid_Key (string_of_int k)) else
@@ -76,6 +74,8 @@ let update_cell t k c v =
                 (fun x -> if not (fst x = k) then x else
                     ((fst x), Row.update (snd x) c v));
     }
+
+let select_all t = t
 
 let select t c f =
   let _ = get_column t c in
@@ -94,6 +94,15 @@ let add_columns t c =
 let delete_columns t c =
   failwith "delete_columns"
 
+let sum_column t c =
+  failwith "sum_column"
+
+let count t c =
+  failwith "count"
+
+let count_null t c =
+  failwith "count_null"
+
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
   string_of_int k ^ "," ^ Row.to_csv r
@@ -103,7 +112,8 @@ let rec string_rows tab =
   let col = tab.columns in
   match tab.table with
   | [] -> ""
-  | h::t -> let tail = string_rows {key = tab.key; columns = col;
+  | h::t -> let tail = string_rows {key = tab.key; 
+                                    columns = col;
                                     table = t} in
     string_row (fst h) (snd h) col ^ (if tail="" then "" else "\n") ^ tail
 
@@ -114,6 +124,5 @@ let rec list_to_csv = function
     h ^ (if tail="" then "" else ",") ^ tail
 
 let to_csv t =
-  let r = "key," ^ list_to_csv t.columns ^ "\n" ^ (string_rows t) in
-  (* print_endline r;  *)
-  r
+  let rows = string_rows t in
+  "key," ^ list_to_csv t.columns ^ if rows="" then rows else "\n" ^ rows
