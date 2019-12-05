@@ -4,7 +4,7 @@
 type t
 
 (** Raised when a table is not found. *)
-exception Table_Not_Found
+exception TableNotFound
 
 (** Raised when attempting to create a table that already exists. *)
 exception Table_Exists
@@ -19,7 +19,7 @@ val create_table : string -> string list -> string
 
 (** [drop_table name] will remove the table associated with [name] from
     the database.
-    Raises: Table_Not_Found if [name] does not exist. *)
+    Raises: TableNotFound if [name] does not exist. *)
 val drop_table : string -> string
 
 (** [read filename] will read the csv file with name [filename] and convert

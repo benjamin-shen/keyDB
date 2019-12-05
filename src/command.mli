@@ -34,7 +34,7 @@ type table_command =
                value:string}
   | Sum    of column             (* sum col *)
   | Count  of column             (* count col *)
-  | Count_Null of column         (* count_null col *)
+  | CountNull of column          (* count_null col *)
 (** The type [command] represents a user command that is decomposed
     into a verb and possibly an object phrase. *)
 type command = 

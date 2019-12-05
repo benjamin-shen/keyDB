@@ -1,6 +1,12 @@
-(** Represents a table. *)
+(* Represents a table. *)
+
 (** A [Table] containing rows and columns. *)
 type t
+
+(* TODO exception specs *)
+exception InvalidColumn of string
+exception InvalidKey of string
+exception TypeError
 
 (** [empty] is the empty table. *)
 val empty : t
@@ -8,8 +14,8 @@ val empty : t
 (** [set_header t c] sets table [t]'s columns to [c]. *)
 val set_columns : t -> string list -> t
 
-(** [get_columns t] returns table [t]'s columns. *)
-val get_columns : t -> string list
+(** [get_column_names t] returns table [t]'s columns. *)
+val get_column_names : t -> string list
 
 (** [read_insert_row t k r] adds a row [r] with key [k] to the end of a table [t]
     and returns the table with the added row. *)
@@ -28,12 +34,12 @@ val remove_rows : t -> int list -> t
 
 (** [get_column t c] finds a column [c] in a table [t] and 
     returns the contents of that column. 
-    Raises: Invalid_Column if [c] is not a column in table [t]. *)
+    Raises: InvalidColumn if [c] is not a column in table [t]. *)
 val get_column : t -> string -> (int * string) list
 
 (** [update_cell t k c v] will update the cell in [t] at key [k] and column [c]
     to value [v]. 
-    Raises: Invalid_Key if [k] is not a valid key in table [t]. *)
+    Raises: InvalidKey if [k] is not a valid key in table [t]. *)
 val update_cell : t -> int -> string -> string -> t
 
 (** [select_all t] is the entire table [t]. *)

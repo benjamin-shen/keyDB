@@ -22,7 +22,7 @@ let database_tests =
     "fail drop test" >:: (fun _ -> 
         (try ignore (drop_table "test"); (* Sys will print out error *)
            failwith "drop";
-         with Table_Not_Found -> ());
+         with TableNotFound -> ());
       );
     "read test" >:: (fun _ -> 
         (try ignore (create_table "test" ["t";"e";"st"]); ()
