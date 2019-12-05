@@ -43,31 +43,32 @@ let rec run_dbms () =
           |> Table.to_csv
           |> print_endline;
         with 
-        | Database.Table_Not_Found -> 
-          print_endline "Table not found";
+        | Database.TableNotFound -> 
+          print_endline "Table not found"
       end; run_dbms ()
     | In (file, SelectStar) -> begin
         try 
           file 
           |> Database.read 
+          |> Table.select_all
           |> Table.to_csv 
           |> print_endline;
         with 
-        | Database.Table_Not_Found -> 
-          print_endline "Table not found"
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
       end; run_dbms ()
     | In (file, Insert vals) -> begin 
         try
           let table = Database.read file in 
           vals 
-          |> Row.build_row (Table.get_columns table) 
+          |> Row.build_row (Table.get_column_names table) 
           |> Table.insert_row table
           |> Database.write file 
           |> print_endline;
           Log.write_log ("in " ^ file ^ " insert " ^ (list_to_string vals))
         with 
-        | Database.Table_Not_Found -> 
-          print_endline "Table not found"
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
       end; run_dbms ()
     | In (file, Remove keys) -> begin
         try
@@ -78,10 +79,12 @@ let rec run_dbms () =
           Log.write_log ("in " ^ file ^ " remove " ^ 
                          (keys |> List.map string_of_int |> list_to_string))
         with 
-        | Database.Table_Not_Found -> 
-          print_endline "Table not found"
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
       end; run_dbms ()
-    | In (file, Update {key=k;col=c;value=v}) -> begin
+    | In (file, Update {key=k;
+                        col=c;
+                        value=v}) -> begin
         try 
           let table = Database.read file in
           Table.update_cell table k c v
@@ -90,8 +93,7 @@ let rec run_dbms () =
           Log.write_log
             ("in " ^ file ^ " update " ^ (string_of_int k) ^ " " ^ c ^ " " ^ v)
         with 
-        | Database.Table_Not_Found ->
-          print_endline "Table not found"
+        | Database.TableNotFound -> print_endline "Table not found."
       end; run_dbms ()
     | In (file, Add columns) -> begin
         (* BUG: does not add commas when writing to csv. *)
@@ -121,12 +123,38 @@ let rec run_dbms () =
     (* ********************************************************************* *)
     | In (file, Sum _) -> print_endline "Sum not implemented."; 
       run_dbms ()
-    | In (file, Count _) -> print_endline "Count not implemented."; 
-      run_dbms ()
-    | In (file, Count_Null _) -> print_endline "Count_null not implemented."; 
-      run_dbms ()
-
-  (* | _ -> print_endline "Command not implemented."; run_dbms () *)
+    | In (file, Sum col) -> begin
+        try 
+          let table = Database.read file in
+          print_endline (Table.sum_column table col);
+        with 
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
+        | Table.TypeError -> 
+          print_endline "Column values must be ints/floats."
+        | Table.InvalidColumn c -> 
+          print_endline ("Invalid column \"" ^ c ^ "\".")
+      end; run_dbms ()
+    | In (file, Count col) -> begin
+        try 
+          let table = Database.read file in
+          print_endline (Table.count table col);
+        with 
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
+        | Table.InvalidColumn c -> 
+          print_endline ("Invalid column \"" ^ c ^ "\".")
+      end; run_dbms ()
+    | In (file, CountNull col) -> begin
+        try 
+          let table = Database.read file in
+          print_endline (Table.count_null table col);
+        with 
+        | Database.TableNotFound -> 
+          print_endline "Table not found."
+        | Table.InvalidColumn c -> 
+          print_endline ("Invalid column \"" ^ c ^ "\".")
+      end; run_dbms ()
   with 
   | Command.Empty ->
     print_newline ();

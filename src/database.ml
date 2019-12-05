@@ -4,7 +4,7 @@ type value = string
 
 type t = unit
 
-exception Table_Not_Found
+exception TableNotFound
 
 exception Table_Exists
 
@@ -33,7 +33,7 @@ let drop_table name =
     ignore (Sys.command ("rm " ^ table));
     "Dropped table: " ^ name end
   else 
-    raise Table_Not_Found
+    raise TableNotFound
 
 (** [row_builder vals header acc] is the row with values [vals] associated 
     with columns in [header]. *)
@@ -62,7 +62,7 @@ let read (filename : string) : Table.t =
     let header = List.tl (input_line channel |> String.split_on_char ',') in
     table_builder channel header Table.empty
   with
-  | Sys_error _ -> raise Table_Not_Found
+  | Sys_error _ -> raise TableNotFound
 (*key,a,b,c
   0,0a,0b,0c
   1,1a,1b,1c

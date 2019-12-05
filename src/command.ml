@@ -19,7 +19,7 @@ type table_command =
                value:string}
   | Sum    of column
   | Count  of column
-  | Count_Null of column
+  | CountNull of column
 type command = 
   | Log
   | Undo
@@ -132,11 +132,11 @@ let table_command (input:string list) : table_command =
   | "count" -> if length > 1 then failwith "count"
     else Count (head object_phrase)
   | "count_null" -> if length > 1 then failwith "count_null"
-    else Count_Null (head object_phrase)
+    else CountNull (head object_phrase)
   | _ -> failwith "Not a table command."
 
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9 .*<]+") "" str in
+  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=]+") "" str in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 
@@ -180,7 +180,8 @@ let help () =
   in the row with key [key].\n" ^
   sum ^ "\n  sums [col] if its values are of type int or float.\n" ^
   count ^ "\n  counts the number of non-null cells in [col].\n" ^
-  count_null ^ "\n  counts the number of null cells in [col].\n" ^
+  count_null ^ "\n  counts the number of null cells in [col].
+  There is an underscore between count and null.\n" ^
   "\nOther commands:\n" ^
   log ^ "\n  prints the log of the current session.\n" ^
   undo ^ "\n  undos the last command (there is no redo).\n" ^
