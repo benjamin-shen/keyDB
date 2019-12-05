@@ -36,10 +36,10 @@ val get_column : t -> string -> (int * string) list
     Raises: Invalid_Key if [k] is not a valid key in table [t]. *)
 val update_cell : t -> int -> string -> string -> t
 
-(** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
-    returns a table containing these rows. 
+(** [select c cd t] finds the rows in [t] for columns [c] that satisfy 
+    the conditions [cd] and returns a table containing these columns and rows. 
     Raises: some error. *)
-val select : t -> string -> string list -> t
+val select : string list -> Command.conditions -> t -> t
 
 (** [add_columns t c] adds columns [cols] to the end of a table [t] and returns
     a table with the specified columns. *)
