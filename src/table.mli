@@ -46,9 +46,9 @@ val update_cell : t -> int -> string -> string -> t
 val select_all : t -> t
 
 (** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
-    returns a table containing these rows. 
+    returns a table containing these rows.\
     Raises: some error. *)
-val select : t -> string -> string list -> t
+val select : string list -> Command.conditions -> t -> t
 
 (** [add_columns t c] adds columns [cols] to the end of a table [t] and returns
     a table with the specified columns. *)

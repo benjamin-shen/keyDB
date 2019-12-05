@@ -79,22 +79,55 @@ let update_cell t k c v =
 
 let select_all t = t
 
-let select t c f =
-  let _ = get_column t c in
-  try
-    failwith ""
-  with
-    x -> failwith "exception occured"
+let rec add_column table col = 
+  List.map (fun (k, r) -> (k, Row.add_column r col " ")) table
 
 let add_columns t c =
+  let rec insert_columns table = function
+    | [] -> table
+    | h::t ->
+      insert_columns (add_column table h) t
+  in
   {
     key = t.key;
     columns = t.columns @ c;
-    table = t.table;
+    table = (insert_columns t.table c);
   }
 
 let delete_columns t c =
-  failwith "delete_columns"
+  let rec del_columns acc table = function
+    | [] -> acc
+    | h::t ->
+      let rec column_from_rows acc col = function
+        | [] -> acc
+        | (k, r)::tl -> 
+          column_from_rows ((k, Row.delete_column r col)::acc) col tl
+      in 
+      column_from_rows [] h table
+  in 
+  {
+    key = t.key;
+    columns = List.filter (fun x -> not (List.mem x c)) t.columns;
+    table = del_columns [] t.table c;
+  }
+
+let select (c : column list) cd t = 
+  try
+    let rec conditioned_table (acc : (key * Row.t) list) = function
+      | [] -> acc
+      | (k, r)::t -> 
+        match Row.condition r c cd with
+        | None -> conditioned_table acc t
+        | Some row -> conditioned_table ((k, row)::acc) t
+    in
+    let table = conditioned_table (add_columns empty c).table t.table in
+    {
+      key = table |> List.rev |> List.hd |> fst;
+      columns = List.rev c;
+      table = table |> List.rev;
+    } 
+  with
+    x -> failwith "exception in select" 
 
 (** [is_int i] returns whether string [s] can be converted to an int. *)
 let is_int s =

@@ -36,7 +36,12 @@ let rec run_dbms () =
       end; run_dbms ()
     | In (file, Select (cols, conditions)) -> begin
         try 
-          print_endline "select not implemented"
+          let old_table = Database.read file in 
+          print_endline "Select with cond";
+          old_table 
+          |> Table.select cols conditions 
+          |> Table.to_csv
+          |> print_endline;
         with 
         | Database.TableNotFound -> 
           print_endline "Table not found"
@@ -90,9 +95,33 @@ let rec run_dbms () =
         with 
         | Database.TableNotFound -> print_endline "Table not found."
       end; run_dbms ()
-    | In (file, Add cols) -> print_endline "Add not implemented."; 
-      run_dbms ()
-    | In (file, Delete cols) -> print_endline "Delete not implemented."; 
+    | In (file, Add columns) -> begin
+        (* BUG: does not add commas when writing to csv. *)
+        print_endline "add cols";
+        try 
+          let table = Database.read file in 
+          Table.add_columns table columns
+          |> Database.write file
+          |> print_endline
+        with
+        | Database.Table_Not_Found ->
+          print_endline "Table not found"
+      end; run_dbms () 
+    | In (file, Delete columns) -> begin
+        print_endline "del cols";
+        try 
+          let table = Database.read file in
+          Table.delete_columns table columns
+          |> Database.write file
+          |> print_endline
+        with
+        | Database.Table_Not_Found ->
+          print_endline "Table not found" 
+      end; run_dbms ()
+
+    (* *************************** UNIMPLEMENTED *************************** *)
+    (* ********************************************************************* *)
+    | In (file, Sum _) -> print_endline "Sum not implemented."; 
       run_dbms ()
     | In (file, Sum col) -> begin
         try 
