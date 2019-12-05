@@ -104,7 +104,7 @@ let rec run_dbms () =
           |> Database.write file
           |> print_endline
         with
-        | Database.Table_Not_Found ->
+        | Database.TableNotFound ->
           print_endline "Table not found"
       end; run_dbms () 
     | In (file, Delete columns) -> begin
@@ -115,14 +115,9 @@ let rec run_dbms () =
           |> Database.write file
           |> print_endline
         with
-        | Database.Table_Not_Found ->
+        | Database.TableNotFound ->
           print_endline "Table not found" 
       end; run_dbms ()
-
-    (* *************************** UNIMPLEMENTED *************************** *)
-    (* ********************************************************************* *)
-    | In (file, Sum _) -> print_endline "Sum not implemented."; 
-      run_dbms ()
     | In (file, Sum col) -> begin
         try 
           let table = Database.read file in

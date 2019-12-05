@@ -6,7 +6,7 @@ type t = unit
 
 exception TableNotFound
 
-exception Table_Exists
+exception TableExists
 
 let dir = "databases"
 
@@ -21,7 +21,7 @@ let rec list_to_csv = function
 let create_table name cols = 
   let file = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists file then
-    raise Table_Exists
+    raise TableExists
   else
     ignore (Sys.command ("touch " ^ file));
   ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));

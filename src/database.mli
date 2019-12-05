@@ -7,7 +7,7 @@ type t
 exception TableNotFound
 
 (** Raised when attempting to create a table that already exists. *)
-exception Table_Exists
+exception TableExists
 
 (** [dir] is the directory of the database. *)
 val dir : string
