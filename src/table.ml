@@ -112,7 +112,7 @@ let delete_columns t c =
   }
 
 let select (c : column list) cd t = 
-  try
+  try 
     let rec conditioned_table (acc : (key * Row.t) list) = function
       | [] -> acc
       | (k, r)::t -> 
@@ -127,7 +127,7 @@ let select (c : column list) cd t =
       table = table |> List.rev;
     } 
   with
-    x -> failwith "exception in select" 
+  | Row.InvalidCol col -> raise (InvalidColumn col)
 
 (** [is_int i] returns whether string [s] can be converted to an int. *)
 let is_int s =
@@ -177,7 +177,7 @@ let sum_column t c =
     an empty value. *)
 let rec count_null = function
   | [] -> 0
-  | (_,v)::t -> if v="" then 1 else 0 + count_null t
+  | (_,v)::t -> if v=" " then 1 else 0 + count_null t
 
 let count t c =
   let col = get_column t c in

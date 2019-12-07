@@ -3,6 +3,8 @@
 (** The type of a row. *)
 type t
 
+exception InvalidCol of string
+
 (** [empty] is the empty row. *)
 val empty : t 
 

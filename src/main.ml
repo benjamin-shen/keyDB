@@ -37,14 +37,13 @@ let rec run_dbms () =
     | In (file, Select (cols, conditions)) -> begin
         try 
           let old_table = Database.read file in 
-          print_endline "Select with cond";
           old_table 
           |> Table.select cols conditions 
           |> Table.to_csv
-          |> print_endline;
+          |> print_endline
         with 
-        | Database.TableNotFound -> 
-          print_endline "Table not found"
+        | Database.TableNotFound -> print_endline "Table not found"
+        | Table.InvalidColumn c -> print_endline ("Column: " ^ c ^ " not found")
       end; run_dbms ()
     | In (file, SelectStar) -> begin
         try 
@@ -67,8 +66,7 @@ let rec run_dbms () =
           |> print_endline;
           Log.write_log ("in " ^ file ^ " insert " ^ (list_to_string vals))
         with 
-        | Database.TableNotFound -> 
-          print_endline "Table not found."
+        | Database.TableNotFound -> print_endline "Table not found."
       end; run_dbms ()
     | In (file, Remove keys) -> begin
         try
@@ -79,8 +77,7 @@ let rec run_dbms () =
           Log.write_log ("in " ^ file ^ " remove " ^ 
                          (keys |> List.map string_of_int |> list_to_string))
         with 
-        | Database.TableNotFound -> 
-          print_endline "Table not found."
+        | Database.TableNotFound -> print_endline "Table not found."
       end; run_dbms ()
     | In (file, Update {key=k;
                         col=c;
@@ -94,6 +91,7 @@ let rec run_dbms () =
             ("in " ^ file ^ " update " ^ (string_of_int k) ^ " " ^ c ^ " " ^ v)
         with 
         | Database.TableNotFound -> print_endline "Table not found."
+        | Table.InvalidKey k -> print_endline ("The key: " ^ k ^ " is invalid.")
       end; run_dbms ()
     | In (file, Add columns) -> begin
         (* BUG: does not add commas when writing to csv. *)
