@@ -9,7 +9,7 @@ type conditions = condition list
 
 type table_command =
   | Select of column list*conditions
-  | SelectStar
+  | SelectStar of conditions
   | Insert of value list
   | Remove of key list
   | Add    of column list
@@ -38,7 +38,7 @@ let quit = "QUIT"
 let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
 (* table commands *)
-let select = "IN [table] SELECT [cols] *? (WHERE [conditions])?"
+let select = "IN [table] SELECT [cols] (WHERE [conditions])?"
 let insert = "IN [table] INSERT [vals]"
 let remove = "IN [table] REMOVE [keys]"
 let add = "IN [table] ADD [cols]"
@@ -75,22 +75,24 @@ let rec tail (input:string list) : object_phrase =
 let str_to_op = function 
     "<" -> LT | "<=" -> LTE | "=" | "==" -> EQ |
     ">" -> GT | ">=" -> GTE | "!=" | "!==" | "<>" -> NE |
-    _ -> raise (Malformed "Invalid operator")
+    _ -> failwith "Invalid operator."
 
 let rec list_to_conditions acc = function
   | [] -> acc
   | col::op::value::[] -> (col, str_to_op op, value)::acc
-  | col::op::value::t -> list_to_conditions ((col, str_to_op op, value)::acc) t
-  | x::t -> print_endline (List.length (x::t) |> string_of_int); 
-    print_endline (x); print_endline (List.hd t); 
-    failwith "list to cond 2" (* raise (Malformed "Invalid number of conditions, must be multiple of 3") *)
+  | col::op::value::"&"::t -> 
+    list_to_conditions ((col, str_to_op op, value)::acc) t
+  | _ -> failwith "Invalid condition."
 
 let select_where (input:string list) =
   match input with
   | [] -> failwith "select_where"
   | h::t -> 
-    if h = "*" && (0 = (List.length t)) then SelectStar 
-    (* else Select ([],[]) *)
+    if h = "*" then
+      match t with
+      | [] | [_] -> SelectStar []
+      | "where"::cond -> SelectStar (list_to_conditions [] cond)
+      | _ -> failwith "No conditions were specified."
     else
       let rec select_builder acc boolcol = function
         | [] -> acc
@@ -100,9 +102,9 @@ let select_where (input:string list) =
           else match acc with
             | Select (cols, conditions) -> 
               if boolcol then 
-                select_builder (Select ((h::cols), conditions)) true t
-              else 
-                let conds = list_to_conditions [] (h::t) in
+                select_builder (Select (cols@[h], conditions)) true t
+              else if cols = [] then failwith "No columns were specified."
+              else let conds = list_to_conditions [] (h::t) in
                 (Select (cols, conds)) 
             | _ -> failwith "not select"
       in select_builder (Select ([],[])) true (h::t)
@@ -142,7 +144,8 @@ let rec has_dup acc = function
             && not (has_dup (h::acc) t)
 
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=]+") "" str in
+  let clean = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" str in
+  let str = Str.global_replace (Str.regexp "[ \n\r\x0c\t]+") " " clean in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 

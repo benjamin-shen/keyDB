@@ -78,8 +78,6 @@ let update_cell t k c v =
                     ((fst x), Row.update (snd x) c v));
     }
 
-let select_all t = t
-
 (** [add column t c] adds column [c] to table [t], filling the values 
     as null values. *)
 let rec add_column tab col = 
@@ -116,6 +114,8 @@ let delete_columns t c =
 
 let select (c : column list) cd t = 
   try 
+    (** [conditioned_table acc table] conditions table [table] to only contain
+        rows satisfying the conditions. *)
     let rec conditioned_table (acc : (key * Row.t) list) = function
       | [] -> acc
       | (k, r)::t -> 
@@ -126,11 +126,14 @@ let select (c : column list) cd t =
     let table = conditioned_table (add_columns empty c).table t.table in 
     {
       key = if table = [] then 0 else table |> List.rev |> List.hd |> fst;
-      columns = List.rev c;
+      columns = c;
       table = List.rev table;
     }
   with
-  | Row.InvalidCol col -> raise (InvalidColumn col)
+  | Row.InvalidColumn col -> raise (InvalidColumn col)
+
+let select_all cd t =
+  select t.columns cd t
 
 (** [is_int i] returns whether string [s] can be converted to an int. *)
 let is_int s =
