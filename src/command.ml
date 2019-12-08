@@ -9,7 +9,7 @@ type conditions = condition list
 
 type table_command =
   | Select of column list*conditions
-  | SelectStar
+  | SelectStar of conditions
   | Insert of value list
   | Remove of key list
   | Add    of column list
@@ -38,7 +38,7 @@ let quit = "QUIT"
 let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
 (* table commands *)
-let select = "IN [table] SELECT [cols] *? (WHERE [conditions])?"
+let select = "IN [table] SELECT [cols] (WHERE [conditions])?"
 let insert = "IN [table] INSERT [vals]"
 let remove = "IN [table] REMOVE [keys]"
 let add = "IN [table] ADD [cols]"
@@ -75,26 +75,28 @@ let rec tail (input:string list) : object_phrase =
 (** [str_to_op s] will take the string [s] and return the associated condition
     type. *)
 let str_to_op = function 
-    "<" -> LT | "<=" -> LTE | "=" -> EQ |
-    ">" -> GT | ">=" -> GTE | "!=" -> NE |
-    _ -> failwith "list to cond"(* raise (Malformed "Invalid operator. Must be: < <= = > >= !=")*)
+    "<" -> LT | "<=" -> LTE | "=" | "==" -> EQ |
+    ">" -> GT | ">=" -> GTE | "!=" | "!==" | "<>" -> NE |
+    _ -> failwith "Invalid operator."
 
 (** [list_to_conditions acc conds]  *)
 let rec list_to_conditions acc = function
   | [] -> acc
   | col::op::value::[] -> (col, str_to_op op, value)::acc
-  | col::op::value::t -> list_to_conditions ((col, str_to_op op, value)::acc) t
-  | x::t -> print_endline (List.length (x::t) |> string_of_int); 
-    print_endline (x); print_endline (List.hd t); 
-    failwith "list to cond 2" (* raise (Malformed "Invalid number of conditions, must be multiple of 3") *)
+  | col::op::value::"&"::t -> 
+    list_to_conditions ((col, str_to_op op, value)::acc) t
+  | _ -> failwith "Invalid condition."
 
 (** [select_where input] turns [input] into a select table command. *)
 let select_where (input:string list) =
   match input with
-  | [] -> failwith "no command phrase in select_where, not even *"
+  | [] -> failwith "select_where"
   | h::t -> 
-    if h = "*" && (0 = (List.length t)) then SelectStar 
-    (* else Select ([],[]) *)
+    if h = "*" then
+      match t with
+      | [] | [_] -> SelectStar []
+      | "where"::cond -> SelectStar (list_to_conditions [] cond)
+      | _ -> failwith "No conditions were specified."
     else
       let rec select_builder acc boolcol = function
         | [] -> acc
@@ -104,9 +106,9 @@ let select_where (input:string list) =
           else match acc with
             | Select (cols, conditions) -> 
               if boolcol then 
-                select_builder (Select ((h::cols), conditions)) true t
-              else 
-                let conds = list_to_conditions [] (h::t) in
+                select_builder (Select (cols@[h], conditions)) true t
+              else if cols = [] then failwith "No columns were specified."
+              else let conds = list_to_conditions [] (h::t) in
                 (Select (cols, conds)) 
             | _ -> failwith "not select"
       in select_builder (Select ([],[])) true (h::t)
@@ -139,8 +141,15 @@ let table_command (input:string list) : table_command =
     else CountNull (head object_phrase)
   | _ -> failwith "Not a table command."
 
+(** [has_dup lst] returns whether a list has duplicates. *)
+let rec has_dup acc = function
+  | [] | [_] -> false
+  | h::t -> not (List.mem h acc) 
+            && not (has_dup (h::acc) t)
+
 let parse str =
-  let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=]+") "" str in
+  let clean = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" str in
+  let str = Str.global_replace (Str.regexp "[ \n\r\x0c\t]+") " " clean in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
     let cmd = get_command 
@@ -157,9 +166,11 @@ let parse str =
       | _ -> failwith "Empty object phrase."
     else
       match command_verb with
-      | "create" -> if length < 2 then failwith "create"
-        else Create {file = head object_phrase;
-                     cols = tail object_phrase;}
+      | "create" -> if length < 2 then failwith "A table need column names."
+        else let cols = tail object_phrase in 
+          if has_dup [] cols then failwith "A table needs unique column names."
+          else Create {file = head object_phrase;
+                       cols = tail object_phrase;}
       | "drop" -> if length <> 1 then failwith "drop"
         else Drop (head object_phrase) 
       | "in" -> if length <= 2 then failwith "in"
@@ -171,12 +182,13 @@ let parse str =
 
 let help () =
   "Database commands:\n" ^
-  create ^ "\n  creates a new table [table] with column [cols].\n" ^
+  create ^ "\n  creates a new table [table] with column [cols]. 
+  The columns must be unique. \n" ^
   drop ^ "\n  drops the table [table].\n" ^
   "\nTable commands:\n" ^
-  select ^ "\n  prints the rows and columns [cols] in [table] 
+  select ^ "\n  prints the columns [cols] of the rows in [table] 
   that satisfy [conditions]. * is equivalent to all columns.\n" ^
-  insert ^ "\n  inserts a new row with [col] to [val] mappings.\n" ^
+  insert ^ "\n  inserts a new row with values [vals].\n" ^
   remove ^ "\n  removes the rows with keys [keys].\n" ^
   add ^ "\n  adds new columns [cols].\n" ^
   delete ^ "\n  deletes columns [cols].\n" ^
@@ -187,6 +199,6 @@ let help () =
   count_null ^ "\n  counts the number of null cells in [col].
   There is an underscore between count and null.\n" ^
   "\nOther commands:\n" ^
-  log ^ "\n  prints the log of the current session.\n" ^
-  undo ^ "\n  undos the last command (there is no redo).\n" ^
+  log ^ "\n  prints the log of the current session.\n" ^ (*
+  undo ^ "\n  undos the last command (there is no redo).\n" ^ *)
   quit ^ "\n  quits the session."

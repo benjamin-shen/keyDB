@@ -4,9 +4,9 @@ type value = string
 
 type t = unit
 
-exception TableNotFound
-
-exception TableExists
+exception TableNotFound of string
+exception TableExists of string
+exception CorruptFile
 
 let dir = "databases"
 
@@ -21,7 +21,7 @@ let rec list_to_csv = function
 let create_table name cols = 
   let file = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists file then
-    raise TableExists
+    raise (TableExists name)
   else
     ignore (Sys.command ("touch " ^ file));
   ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
@@ -33,7 +33,7 @@ let drop_table name =
     ignore (Sys.command ("rm " ^ table));
     "Dropped table: " ^ name end
   else 
-    raise TableNotFound
+    raise (TableNotFound name)
 
 (** [row_builder vals header acc] is the row with values [vals] associated 
     with columns in [header]. *)
@@ -43,7 +43,7 @@ let rec row_builder vals header acc =
     | [] -> acc
     | h::t -> 
       row_builder t (List.tl header) (Row.add_column acc (List.hd header) h)
-  else failwith "Value list is too long."
+  else raise CorruptFile
 
 (** [table_builder c header acc] will copy each line in [c] to the table [acc]. *)
 let rec table_builder c header acc = 
@@ -62,11 +62,7 @@ let read (filename : string) : Table.t =
     let header = List.tl (input_line channel |> String.split_on_char ',') in
     table_builder channel header Table.empty
   with
-  | Sys_error _ -> raise TableNotFound
-(*key,a,b,c
-  0,0a,0b,0c
-  1,1a,1b,1c
-  2,2a,2b,2c*)
+  | Sys_error _ -> raise (TableNotFound filename)
 
 let write filename table =
   let file = dir ^ Filename.dir_sep ^ filename in

@@ -3,7 +3,9 @@
 (** The type of a row. *)
 type t
 
-exception InvalidCol of string
+(*todo*)
+exception InvalidColumn of string
+exception ValueMismatch of int
 
 (** [empty] is the empty row. *)
 val empty : t 

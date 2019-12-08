@@ -4,6 +4,7 @@
 type t
 
 (* TODO exception specs *)
+exception ColumnExists of string
 exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError
@@ -42,13 +43,13 @@ val get_column : t -> string -> (int * string) list
     Raises: InvalidKey if [k] is not a valid key in table [t]. *)
 val update_cell : t -> int -> string -> string -> t
 
-(** [select_all t] is the entire table [t]. *)
-val select_all : t -> t
-
-(** [select t c f] finds the rows in [t] that satisfy the conditions [c] and
-    returns a table containing these rows.\
+(** [select c cd t] finds the rows in [t] that satisfy the conditions [cd] and
+    returns a table containing these rows with columns [c].
     Raises: some error. *)
 val select : string list -> Command.conditions -> t -> t
+
+(** [select_all cd t] finds the rows in [t] that satisfy the conditions [cd]. *)
+val select_all : Command.conditions -> t -> t
 
 (** [add_columns t c] adds columns [cols] to the end of a table [t] and returns
     a table with the specified columns. *)

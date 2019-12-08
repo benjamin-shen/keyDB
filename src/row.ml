@@ -1,6 +1,7 @@
 type t = (string * string) list
 
-exception InvalidCol of string
+exception InvalidColumn of string
+exception ValueMismatch of int
 
 let empty = []
 
@@ -8,7 +9,7 @@ let value r c = List.assoc c r
 
 let add_column r c v = r @ [(c,v)]
 
-let delete_column r c = List.filter (fun (col, _) -> not (col = c)) r
+let delete_column r c = List.filter (fun (col, _) -> col<>c) r
 
 let rec update r c v = match r with
   | [] -> []
@@ -39,19 +40,19 @@ let condition (r : t) (c : string list) (cd : Command.conditions) =
             | Command.GTE -> if rv >= v then column_check acc' t else None
         in if (List.length cd) = 0 then
           condition_cols (add_column acc hcol (value r hcol)) tcol
-        else column_check (acc) cd
+        else column_check acc cd
       with
-      | Not_found -> raise (InvalidCol hcol)
-  in match condition_cols (empty) c with
-  | None -> None
-  | Some list -> Some (List.rev list)
+      | Not_found -> raise (InvalidColumn hcol)
+  in condition_cols empty c
 
 let build_row cs vs = 
-  assert (List.length vs = List.length cs);
-  let rec row_builder acc vals = function 
-    | [] -> acc
-    | h::t -> row_builder ((h, List.hd vals)::acc) (List.tl vals) t
-  in row_builder empty (List.rev vs) (List.rev cs)
+  let len = List.length cs in
+  if List.length vs = len then
+    let rec row_builder acc vals = function 
+      | [] -> acc
+      | h::t -> row_builder ((h, List.hd vals)::acc) (List.tl vals) t
+    in row_builder empty (List.rev vs) (List.rev cs)
+  else raise (ValueMismatch len)
 
 let rec to_csv r = 
   match r with

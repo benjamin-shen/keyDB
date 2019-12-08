@@ -6,10 +6,13 @@
 type t
 
 (** Raised when a table is not found. *)
-exception TableNotFound
+exception TableNotFound of string
 
 (** Raised when attempting to create a table that already exists. *)
-exception TableExists
+exception TableExists of string
+
+(** Raised when the csv is corrupted and can't be read as a table. *)
+exception CorruptFile
 
 (** [dir] is the directory of the database. *)
 val dir : string

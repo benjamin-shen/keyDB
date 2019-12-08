@@ -24,7 +24,7 @@ type conditions = condition list
     operated on a particular table. *)
 type table_command =
   | Select of column list*conditions (* select cols where conditions *)
-  | SelectStar                   (* select all cols and vals *)
+  | SelectStar of conditions     (* select * where conditions *)
   | Insert of value list         (* insert vals *)
   | Remove of key list           (* remove keyval  *)
   | Add    of column list        (* add col *)
