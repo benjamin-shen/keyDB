@@ -8,8 +8,8 @@ exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError
 
-(* [null] is the null value of a cell. *)
-let null = " "
+(** [null] is the null value of a cell. *)
+let null = "_"
 
 (** AF: An association list mapping keys to rows, that 
     represents a database table.
@@ -86,7 +86,7 @@ let rec add_column tab col =
   else {
     key = tab.key;
     columns = tab.columns @ [col];
-    table = List.map (fun (k, r) -> (k, Row.add_column r col "_")) tab.table;
+    table = List.map (fun (k, r) -> (k, Row.add_column r col null)) tab.table;
   }
 
 let add_columns t c =
@@ -183,11 +183,7 @@ let sum_column t c =
     an empty value. *)
 let rec count_null = function
   | [] -> 0
-          <<<<<<< HEAD
   | (_,v)::t -> if v=null then 1 else 0 + count_null t
-                                      =======
-  | (_,v)::t -> (if v="_" then 1 else 0) + count_null t
-    >>>>>>> 7a7e5a477a9771c610739032fb77d6f138e9c45a
 
 let count t c =
   let col = get_column t c in
