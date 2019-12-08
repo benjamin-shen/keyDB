@@ -30,14 +30,16 @@ let condition (r : t) (c : string list) (cd : Command.conditions) =
            if condition satisfied, add column, otherwise stop and return none *)
         let rec column_check acc' = function
           | [] -> condition_cols (add_column acc' hcol (value r hcol)) tcol
-          | (col, op, v)::t ->
-            let rv = value r col in match op with 
-            | Command.LT  -> if rv < v then column_check acc' t else None
-            | Command.LTE -> if rv <= v then column_check acc' t else None
-            | Command.EQ  -> if rv = v then column_check acc' t else None
-            | Command.NE  -> if rv <> v then column_check acc' t else None
-            | Command.GT  -> if rv > v then column_check acc' t else None
-            | Command.GTE -> if rv >= v then column_check acc' t else None
+          | (col, op, v)::t -> 
+            if List.mem_assoc col r then
+              let rv = value r col in match op with 
+              | Command.LT  -> if rv < v then column_check acc' t else None
+              | Command.LTE -> if rv <= v then column_check acc' t else None
+              | Command.EQ  -> if rv = v then column_check acc' t else None
+              | Command.NE  -> if rv <> v then column_check acc' t else None
+              | Command.GT  -> if rv > v then column_check acc' t else None
+              | Command.GTE -> if rv >= v then column_check acc' t else None
+            else raise (InvalidColumn col)
         in if (List.length cd) = 0 then
           condition_cols (add_column acc hcol (value r hcol)) tcol
         else column_check acc cd
