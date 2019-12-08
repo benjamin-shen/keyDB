@@ -141,7 +141,6 @@ let rec run_dbms () =
     print_string ("Error: " ^ str ^ " is not a valid command. ");
     print_endline {|Type "help" or "quit".|};
     run_dbms ()
-  | e -> raise e
   | _ ->
     print_newline ();
     print_newline ();

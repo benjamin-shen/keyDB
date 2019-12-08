@@ -178,12 +178,13 @@ let parse str =
 
 let help () =
   "Database commands:\n" ^
-  create ^ "\n  creates a new table [table] with column [cols].\n" ^
+  create ^ "\n  creates a new table [table] with column [cols]. 
+  The columns must be unique. \n" ^
   drop ^ "\n  drops the table [table].\n" ^
   "\nTable commands:\n" ^
-  select ^ "\n  prints the rows and columns [cols] in [table] 
+  select ^ "\n  prints the columns [cols] of the rows in [table] 
   that satisfy [conditions]. * is equivalent to all columns.\n" ^
-  insert ^ "\n  inserts a new row with [col] to [val] mappings.\n" ^
+  insert ^ "\n  inserts a new row with values [vals].\n" ^
   remove ^ "\n  removes the rows with keys [keys].\n" ^
   add ^ "\n  adds new columns [cols].\n" ^
   delete ^ "\n  deletes columns [cols].\n" ^
