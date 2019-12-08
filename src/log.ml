@@ -20,4 +20,4 @@ let write_log line =
   output_string out (if empty then line else "\n" ^ line);
   close_out out
 
-let undo () = "undo not implemented"
+let undo () = "Undo is not implemented in this version of keyDB."

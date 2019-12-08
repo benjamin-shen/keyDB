@@ -3,6 +3,7 @@ type column = string
 type value = string
 type condition = string
 
+exception ColumnExists of string
 exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError
@@ -79,36 +80,38 @@ let update_cell t k c v =
 
 let select_all t = t
 
-let rec add_column table col = 
-  List.map (fun (k, r) -> (k, Row.add_column r col " ")) table
+(** [add column t c] adds column [c] to table [t], filling the values 
+    as null values. *)
+let rec add_column tab col = 
+  if List.mem col tab.columns then
+    raise (ColumnExists col)
+  else {
+    key = tab.key;
+    columns = tab.columns @ [col];
+    table = List.map (fun (k, r) -> (k, Row.add_column r col "_")) tab.table;
+  }
 
 let add_columns t c =
   let rec insert_columns table = function
     | [] -> table
-    | h::t ->
-      insert_columns (add_column table h) t
-  in
-  {
-    key = t.key;
-    columns = t.columns @ c;
-    table = (insert_columns t.table c);
-  }
+    | h::t -> insert_columns (add_column table h) t
+  in insert_columns t c
 
 let delete_columns t c =
-  let rec del_columns acc table = function
-    | [] -> acc
+  let rec del_column table = function
+    | [] -> table
     | h::t ->
-      let rec column_from_rows acc col = function
-        | [] -> acc
-        | (k, r)::tl -> 
-          column_from_rows ((k, Row.delete_column r col)::acc) col tl
+      let rec column_from_rows col = function
+        | [] -> []
+        | (k,r)::tl -> 
+          (k, Row.delete_column r col) :: column_from_rows col tl
       in 
-      column_from_rows [] h table
+      del_column (column_from_rows h table) t
   in 
   {
     key = t.key;
     columns = List.filter (fun x -> not (List.mem x c)) t.columns;
-    table = del_columns [] t.table c;
+    table = del_column t.table c;
   }
 
 let select (c : column list) cd t = 
@@ -120,12 +123,12 @@ let select (c : column list) cd t =
         | None -> conditioned_table acc t
         | Some row -> conditioned_table ((k, row)::acc) t
     in
-    let table = conditioned_table (add_columns empty c).table t.table in
+    let table = conditioned_table (add_columns empty c).table t.table in 
     {
-      key = table |> List.rev |> List.hd |> fst;
+      key = if table = [] then 0 else table |> List.rev |> List.hd |> fst;
       columns = List.rev c;
-      table = table |> List.rev;
-    } 
+      table = List.rev table;
+    }
   with
   | Row.InvalidCol col -> raise (InvalidColumn col)
 
@@ -177,7 +180,7 @@ let sum_column t c =
     an empty value. *)
 let rec count_null = function
   | [] -> 0
-  | (_,v)::t -> if v=" " then 1 else 0 + count_null t
+  | (_,v)::t -> (if v="_" then 1 else 0) + count_null t
 
 let count t c =
   let col = get_column t c in
@@ -189,7 +192,8 @@ let count_null t c =
 
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
-  string_of_int k ^ "," ^ Row.to_csv r
+  let row = Row.to_csv r in
+  string_of_int k ^ (if row="" then "" else ",") ^ row
 
 (** [string_rows tab] converts the rows of a table to a string. *)
 let rec string_rows tab = 
@@ -209,4 +213,7 @@ let rec list_to_csv = function
 
 let to_csv t =
   let rows = string_rows t in
-  "key," ^ list_to_csv t.columns ^ if rows="" then rows else "\n" ^ rows
+  let cols = list_to_csv t.columns in
+  "key" ^ 
+  (if cols="" then "" else ",") ^ cols ^ 
+  if rows="" then "" else "\n" ^ rows

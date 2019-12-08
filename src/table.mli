@@ -4,6 +4,7 @@
 type t
 
 (* TODO exception specs *)
+exception ColumnExists of string
 exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError

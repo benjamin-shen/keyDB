@@ -36,14 +36,16 @@ let rec run_dbms () =
       end; run_dbms ()
     | In (file, Select (cols, conditions)) -> begin
         try 
-          let old_table = Database.read file in 
-          old_table 
+          file
+          |> Database.read 
           |> Table.select cols conditions 
           |> Table.to_csv
           |> print_endline
         with 
-        | Database.TableNotFound -> print_endline "Table not found"
-        | Table.InvalidColumn c -> print_endline ("Column: " ^ c ^ " not found")
+        | Database.TableNotFound -> 
+          print_endline ("Table " ^ file ^ " not found.")
+        | Table.InvalidColumn c -> 
+          print_endline ("Invalid column " ^ c ^ ".")
       end; run_dbms ()
     | In (file, SelectStar) -> begin
         try 
@@ -54,7 +56,7 @@ let rec run_dbms () =
           |> print_endline;
         with 
         | Database.TableNotFound -> 
-          print_endline "Table not found."
+          print_endline ("Table " ^ file ^ " not found.")
       end; run_dbms ()
     | In (file, Insert vals) -> begin 
         try
@@ -66,7 +68,8 @@ let rec run_dbms () =
           |> print_endline;
           Log.write_log ("in " ^ file ^ " insert " ^ (list_to_string vals))
         with 
-        | Database.TableNotFound -> print_endline "Table not found."
+        | Database.TableNotFound -> 
+          print_endline ("Table " ^ file ^ " not found.")
       end; run_dbms ()
     | In (file, Remove keys) -> begin
         try
@@ -77,7 +80,8 @@ let rec run_dbms () =
           Log.write_log ("in " ^ file ^ " remove " ^ 
                          (keys |> List.map string_of_int |> list_to_string))
         with 
-        | Database.TableNotFound -> print_endline "Table not found."
+        | Database.TableNotFound -> 
+          print_endline ("Table " ^ file ^ " not found.")
       end; run_dbms ()
     | In (file, Update {key=k;
                         col=c;
@@ -90,12 +94,12 @@ let rec run_dbms () =
           Log.write_log
             ("in " ^ file ^ " update " ^ (string_of_int k) ^ " " ^ c ^ " " ^ v)
         with 
-        | Database.TableNotFound -> print_endline "Table not found."
-        | Table.InvalidKey k -> print_endline ("The key: " ^ k ^ " is invalid.")
+        | Database.TableNotFound -> 
+          print_endline ("Table " ^ file ^ " not found.")
+        | Table.InvalidKey k -> 
+          print_endline ("The key: " ^ k ^ " is invalid.")
       end; run_dbms ()
     | In (file, Add columns) -> begin
-        (* BUG: does not add commas when writing to csv. *)
-        print_endline "add cols";
         try 
           let table = Database.read file in 
           Table.add_columns table columns
@@ -103,10 +107,11 @@ let rec run_dbms () =
           |> print_endline
         with
         | Database.TableNotFound ->
-          print_endline "Table not found"
+          print_endline ("Table " ^ file ^ " not found.")
+        | Table.ColumnExists c ->
+          print_endline ("Column " ^ c ^ " already exists.")
       end; run_dbms () 
     | In (file, Delete columns) -> begin
-        print_endline "del cols";
         try 
           let table = Database.read file in
           Table.delete_columns table columns
@@ -114,7 +119,9 @@ let rec run_dbms () =
           |> print_endline
         with
         | Database.TableNotFound ->
-          print_endline "Table not found" 
+          print_endline ("Table " ^ file ^ " not found.") 
+        | Table.InvalidColumn c ->
+          print_endline ("Invalid column " ^ c ^ ".")
       end; run_dbms ()
     | In (file, Sum col) -> begin
         try 
@@ -122,11 +129,11 @@ let rec run_dbms () =
           print_endline (Table.sum_column table col);
         with 
         | Database.TableNotFound -> 
-          print_endline "Table not found."
+          print_endline ("Table " ^ file ^ " not found.")
         | Table.TypeError -> 
           print_endline "Column values must be ints/floats."
         | Table.InvalidColumn c -> 
-          print_endline ("Invalid column \"" ^ c ^ "\".")
+          print_endline ("Invalid column " ^ c ^ ".")
       end; run_dbms ()
     | In (file, Count col) -> begin
         try 
@@ -134,9 +141,9 @@ let rec run_dbms () =
           print_endline (Table.count table col);
         with 
         | Database.TableNotFound -> 
-          print_endline "Table not found."
+          print_endline ("Table " ^ file ^ " not found.")
         | Table.InvalidColumn c -> 
-          print_endline ("Invalid column \"" ^ c ^ "\".")
+          print_endline ("Invalid column " ^ c ^ ".")
       end; run_dbms ()
     | In (file, CountNull col) -> begin
         try 
@@ -144,9 +151,9 @@ let rec run_dbms () =
           print_endline (Table.count_null table col);
         with 
         | Database.TableNotFound -> 
-          print_endline "Table not found."
+          print_endline ("Table " ^ file ^ " not found.")
         | Table.InvalidColumn c -> 
-          print_endline ("Invalid column \"" ^ c ^ "\".")
+          print_endline ("Invalid column " ^ c ^ ".")
       end; run_dbms ()
   with 
   | Command.Empty ->

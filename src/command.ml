@@ -73,9 +73,9 @@ let rec tail (input:string list) : object_phrase =
   | _::t -> t
 
 let str_to_op = function 
-    "<" -> LT | "<=" -> LTE | "=" -> EQ |
-    ">" -> GT | ">=" -> GTE | "!=" -> NE |
-    _ -> failwith "list to cond"(* raise (Malformed "Invalid operator. Must be: < <= = > >= !=")*)
+    "<" -> LT | "<=" -> LTE | "=" | "==" -> EQ |
+    ">" -> GT | ">=" -> GTE | "!=" | "!==" | "<>" -> NE |
+    _ -> raise (Malformed "Invalid operator")
 
 let rec list_to_conditions acc = function
   | [] -> acc
@@ -87,7 +87,7 @@ let rec list_to_conditions acc = function
 
 let select_where (input:string list) =
   match input with
-  | [] -> failwith "no command phrase in select_where, not even *"
+  | [] -> failwith "select_where"
   | h::t -> 
     if h = "*" && (0 = (List.length t)) then SelectStar 
     (* else Select ([],[]) *)
@@ -135,6 +135,12 @@ let table_command (input:string list) : table_command =
     else CountNull (head object_phrase)
   | _ -> failwith "Not a table command."
 
+(** [has_dup lst] returns whether a list has duplicates. *)
+let rec has_dup acc = function
+  | [] | [_] -> false
+  | h::t -> not (List.mem h acc) 
+            && not (has_dup (h::acc) t)
+
 let parse str =
   let str = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=]+") "" str in
   let failure = {|"|} ^ str ^ {|"|} in
@@ -153,9 +159,11 @@ let parse str =
       | _ -> failwith "Empty object phrase."
     else
       match command_verb with
-      | "create" -> if length < 2 then failwith "create"
-        else Create {file = head object_phrase;
-                     cols = tail object_phrase;}
+      | "create" -> if length < 2 then failwith "A table need column names."
+        else let cols = tail object_phrase in 
+          if has_dup [] cols then failwith "A table needs unique column names."
+          else Create {file = head object_phrase;
+                       cols = tail object_phrase;}
       | "drop" -> if length <> 1 then failwith "drop"
         else Drop (head object_phrase) 
       | "in" -> if length <= 2 then failwith "in"
@@ -183,6 +191,6 @@ let help () =
   count_null ^ "\n  counts the number of null cells in [col].
   There is an underscore between count and null.\n" ^
   "\nOther commands:\n" ^
-  log ^ "\n  prints the log of the current session.\n" ^
-  undo ^ "\n  undos the last command (there is no redo).\n" ^
+  log ^ "\n  prints the log of the current session.\n" ^ (*
+  undo ^ "\n  undos the last command (there is no redo).\n" ^ *)
   quit ^ "\n  quits the session."
