@@ -30,19 +30,13 @@ let condition (r : t) (c : string list) (cd : Command.conditions) =
         let rec column_check acc' = function
           | [] -> condition_cols (add_column acc' hcol (value r hcol)) tcol
           | (col, op, v)::t ->
-            if hcol = col then
-              let rv = value r col in
-              (* Check cond, return none if not satisfied or check more cond if so*)
-              match op with 
-              | Command.LT  -> if rv < v then column_check acc' t else None
-              | Command.LTE -> if rv <= v then column_check acc' t else None
-              | Command.EQ  -> if rv = v then column_check acc' t else None
-              | Command.NE  -> if rv <> v then column_check acc' t else None
-              | Command.GT  -> print_endline "gt"; if rv > v then column_check acc' t else None
-              | Command.GTE -> if rv >= v then column_check acc' t else None
-            else 
-              (* add column and value if not part of condition *)
-              column_check acc' t
+            let rv = value r col in match op with 
+            | Command.LT  -> if rv < v then column_check acc' t else None
+            | Command.LTE -> if rv <= v then column_check acc' t else None
+            | Command.EQ  -> if rv = v then column_check acc' t else None
+            | Command.NE  -> if rv <> v then column_check acc' t else None
+            | Command.GT  -> if rv > v then column_check acc' t else None
+            | Command.GTE -> if rv >= v then column_check acc' t else None
         in if (List.length cd) = 0 then
           condition_cols (add_column acc hcol (value r hcol)) tcol
         else column_check (acc) cd
