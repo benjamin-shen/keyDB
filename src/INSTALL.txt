@@ -20,6 +20,6 @@
   `log`
   `in abc select a c`
   `in abc select a where a = 1a`
-  `in abc select a where c > 1c & d >= 4`
+  `in abc select * where c > 1c & d >= 4`
   `drop abc`
   `quit`
