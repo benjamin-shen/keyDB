@@ -1,4 +1,6 @@
-(** High level management for the DBMS *)
+(** 
+   High level management for the DBMS. 
+*)
 
 (** the type of database *)
 type t

@@ -35,6 +35,7 @@ type table_command =
   | Sum    of column             (* sum col *)
   | Count  of column             (* count col *)
   | CountNull of column          (* count_null col *)
+
 (** The type [command] represents a user command that is decomposed
     into a verb and possibly an object phrase. *)
 type command = 
@@ -52,6 +53,7 @@ exception Empty
 
 (** TODO *)
 type err = string
+
 (** Raised when a malformed command is encountered. *)
 exception Malformed of err
 

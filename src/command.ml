@@ -72,11 +72,14 @@ let rec tail (input:string list) : object_phrase =
   | [] -> []
   | _::t -> t
 
+(** [str_to_op s] will take the string [s] and return the associated condition
+    type. *)
 let str_to_op = function 
     "<" -> LT | "<=" -> LTE | "=" -> EQ |
     ">" -> GT | ">=" -> GTE | "!=" -> NE |
     _ -> failwith "list to cond"(* raise (Malformed "Invalid operator. Must be: < <= = > >= !=")*)
 
+(** [list_to_conditions acc conds]  *)
 let rec list_to_conditions acc = function
   | [] -> acc
   | col::op::value::[] -> (col, str_to_op op, value)::acc
@@ -85,6 +88,7 @@ let rec list_to_conditions acc = function
     print_endline (x); print_endline (List.hd t); 
     failwith "list to cond 2" (* raise (Malformed "Invalid number of conditions, must be multiple of 3") *)
 
+(** [select_where input] turns [input] into a select table command. *)
 let select_where (input:string list) =
   match input with
   | [] -> failwith "no command phrase in select_where, not even *"

@@ -44,7 +44,7 @@ let condition (r : t) (c : string list) (cd : Command.conditions) =
       | Not_found -> raise (InvalidCol hcol)
   in match condition_cols (empty) c with
   | None -> None
-  | Some list -> print_string "\n"; Some (List.rev list)
+  | Some list -> Some (List.rev list)
 
 let build_row cs vs = 
   assert (List.length vs = List.length cs);
@@ -52,8 +52,6 @@ let build_row cs vs =
     | [] -> acc
     | h::t -> row_builder ((h, List.hd vals)::acc) (List.tl vals) t
   in row_builder empty (List.rev vs) (List.rev cs)
-
-
 
 let rec to_csv r = 
   match r with

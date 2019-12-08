@@ -1,4 +1,6 @@
-(* Log functions *)
+(** 
+   Log user inputs to the DBMS.
+*)
 
 (** [clear] deletes the log. *)
 val clear : unit -> unit

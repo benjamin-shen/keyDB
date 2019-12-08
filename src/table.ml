@@ -7,6 +7,9 @@ exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError
 
+(* [null] is the null value of a cell. *)
+let null = " "
+
 (** AF: An association list mapping keys to rows, that 
     represents a database table.
   * RI: TODO *)
@@ -32,26 +35,23 @@ let set_columns t c = {
 
 let get_column_names t = t.columns
 
-let read_insert_row t k r =
-  {
-    key = k;
-    columns = t.columns;
-    table = t.table @ [(k,r)]
-  }
+let read_insert_row t k r = {
+  key = k;
+  columns = t.columns;
+  table = t.table @ [(k,r)]
+}
 
-let insert_row t r =
-  {
-    key = t.key + 1;
-    columns = t.columns;
-    table = t.table @ [(t.key + 1,r)]
-  }
+let insert_row t r =  {
+  key = t.key + 1;
+  columns = t.columns;
+  table = t.table @ [(t.key + 1,r)]
+}
 
-let remove_row t k =
-  { 
-    key = t.key;
-    columns = t.columns;
-    table = List.remove_assoc k t.table
-  }
+let remove_row t k =  { 
+  key = t.key;
+  columns = t.columns;
+  table = List.remove_assoc k t.table
+}
 
 let rec remove_rows t = function
   | [] -> t
@@ -79,8 +79,9 @@ let update_cell t k c v =
 
 let select_all t = t
 
-let rec add_column table col = 
-  List.map (fun (k, r) -> (k, Row.add_column r col " ")) table
+(** [add_column t c] is [t] with a new column [c] set with the null value. *)
+let rec add_column t c = 
+  List.map (fun (k, r) -> (k, Row.add_column r c null)) t
 
 let add_columns t c =
   let rec insert_columns table = function
@@ -177,7 +178,7 @@ let sum_column t c =
     an empty value. *)
 let rec count_null = function
   | [] -> 0
-  | (_,v)::t -> if v=" " then 1 else 0 + count_null t
+  | (_,v)::t -> if v=null then 1 else 0 + count_null t
 
 let count t c =
   let col = get_column t c in
