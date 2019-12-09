@@ -18,7 +18,7 @@ val set_columns : t -> string list -> t
 (** [get_column_names t] returns table [t]'s columns. *)
 val get_column_names : t -> string list
 
-(** [read_insert_row t k r] adds a row [r] with key [k] to the end of a table [t]
+(** [read_insert_row t k r] adds a row [r] with key [k] to the end of table [t]
     and returns the table with the added row. *)
 val read_insert_row : t -> int -> Row.t -> t
 
@@ -45,7 +45,7 @@ val update_cell : t -> int -> string -> string -> t
 
 (** [select c cd t] finds the rows in [t] that satisfy the conditions [cd] and
     returns a table containing these rows with columns [c].
-    Raises: some error. *)
+    Raises: InvalidColumn if a column in [c] or [cd] are not present in [t]. *)
 val select : string list -> Command.conditions -> t -> t
 
 (** [select_all cd t] finds the rows in [t] that satisfy the conditions [cd]. *)
@@ -61,7 +61,8 @@ val add_columns : t -> string list -> t
 val delete_columns : t -> string list -> t
 
 (** [sum_column t c] sums column [col] in table [t] if each value are of
-    type int or float. *)
+    type int or float. 
+    Raises: TypeError if all the values in [col] are not type int or float. *)
 val sum_column : t -> string -> string
 
 (** [count t c] counts the non-null values of column [col] in table [t]. *)
