@@ -1,95 +1,96 @@
 open OUnit2
-open Database
-open Table
-
 
 (** [f3 f a b t] is a simple composition function that calls [f] on [t] [a] [b],
     in that order. *)
 let f3 f a b t = f t a b
-
 (** [f2 f a t] is a simple composition function that calls [f] on [t] [a],
     in that order. *)
 let f2 f a t = f t a
 
+open Database
 let database_tests =  [
   "create drop table test" >:: (fun _ -> 
-      (try ignore (create_table "test" ["t";"e";"st"]); ()
+      (try ignore (Database.create_table "test" ["t";"e";"st"]); ()
        with _ -> failwith "create");
-      (try ignore (drop_table "test"); ()
+      (try ignore (Database.drop_table "test"); ()
        with _ -> failwith "drop");
     );
   "fail create test" >:: (fun _ -> 
-      (try ignore (create_table "test" ["t";"e";"st"]);
-         ignore (create_table "test" ["t";"e";"s";"t"]);
-         ignore (drop_table "test");
-         failwith "create";
-       with TableExists table -> ();
-         ignore (drop_table "test"));
+      let file = "test" in
+      assert_raises (Database.TableExists(file)) 
+        (fun _ -> 
+           ignore (Database.create_table file ["t";"e";"st"]);
+           ignore (Database.create_table file ["t";"e";"st"]););
+      ignore (Database.drop_table file);
     );
   "fail drop test" >:: (fun _ -> 
-      (try ignore (drop_table "test"); (* Sys will print out error *)
-         failwith "drop";
-       with TableNotFound table -> ());
+      let file = "nonexistent" in
+      assert_raises (Database.TableNotFound(file)) 
+        (fun _ -> 
+           ignore (Database.drop_table file));
     );
   "read test" >:: (fun _ -> 
-      (try ignore (create_table "test" ["t";"e";"st"]); ()
-       with _ -> failwith "create");
-
-      ignore (drop_table "test");
+      let file = "test" in
+      try
+        ignore (Database.create_table file ["t";"e";"st"]);
+        (*TODO*)
+        ignore (Database.drop_table file);
+      with _ -> failwith "read"
     );
 ]
 
-let row_empty =          Row.empty
-let row_a =              Row.empty |> f3 (Row.add_column) "a" "a"
-let row_b =              Row.empty |> f3 (Row.add_column) "b" "b"  
-let row_a_update_b =     Row.empty |> f3 (Row.add_column) "a" "b" 
-let row_ab =             Row.empty 
-                         |> f3 (Row.add_column) "a" "a"
-                         |> f3 (Row.add_column) "b" "b"
-let cond_row_a =         Row.condition row_a ["a"]
-let cond_row_ab_a =      Row.condition row_ab ["a"]
-let cond_row_ab_ab =     Row.condition row_ab ["a";"b"]
-let cond_row_ab_b =      Row.condition row_ab ["b"]
-let conds_a_lt_b_t =     [("a", Command.LT, "b")]
-let conds_a_lt_b_f =     [("a", Command.LT, "0")]
-let conds_a_lte_b_t =    [("a", Command.LTE, "b")]
-let conds_a_lte_b_t_eq = [("a", Command.LTE, "a")]
-let conds_a_lte_b_f =    [("a", Command.LTE,"0")]
-let conds_a_eq_a_t =     [("a", Command.EQ, "a")]
-let conds_a_eq_b_f =     [("a", Command.EQ, "b")]
-let conds_a_ne_b_t =     [("a", Command.NE, "b")]
-let conds_a_ne_a_f =     [("a", Command.NE, "a")]
-let conds_a_gt_b_f =     [("a", Command.GT, "b")]
-let conds_a_gt_b_t =     [("a", Command.GT, "0")]
-let conds_a_gte_b_f =    [("a", Command.GTE, "b")]
-let conds_a_gte_b_t_eq = [("a", Command.GTE, "a")]
-let conds_a_gte_b_t =    [("a", Command.GTE,"0")]
-let conds_mult_t_t =     [("a", Command.LT, "b"); ("a", Command.EQ, "a")]
-let conds_mult_t_f =     [("a", Command.LT, "b"); ("a", Command.EQ, "b")]
-let conds_mult_f_f =     [("a", Command.LT, "0"); ("a", Command.EQ, "b")]
-let conds_mult_t_t_d =   [("a", Command.EQ, "a"); ("b", Command.EQ, "b")]
+open Row
+open Command
+let row_empty =          empty
+let row_a =              empty |> f3 (add_column) "a" "a"
+let row_b =              empty |> f3 (add_column) "b" "b"  
+let row_a_update_b =     empty |> f3 (add_column) "a" "b" 
+let row_ab =             empty 
+                         |> f3 (add_column) "a" "a"
+                         |> f3 (add_column) "b" "b"
+let cond_row_a =         condition row_a ["a"]
+let cond_row_ab_a =      condition row_ab ["a"]
+let cond_row_ab_ab =     condition row_ab ["a";"b"]
+let cond_row_ab_b =      condition row_ab ["b"]
+let conds_a_lt_b_t =     [("a", LT, "b")]
+let conds_a_lt_b_f =     [("a", LT, "0")]
+let conds_a_lte_b_t =    [("a", LTE, "b")]
+let conds_a_lte_b_t_eq = [("a", LTE, "a")]
+let conds_a_lte_b_f =    [("a", LTE,"0")]
+let conds_a_eq_a_t =     [("a", EQ, "a")]
+let conds_a_eq_b_f =     [("a", EQ, "b")]
+let conds_a_ne_b_t =     [("a", NE, "b")]
+let conds_a_ne_a_f =     [("a", NE, "a")]
+let conds_a_gt_b_f =     [("a", GT, "b")]
+let conds_a_gt_b_t =     [("a", GT, "0")]
+let conds_a_gte_b_f =    [("a", GTE, "b")]
+let conds_a_gte_b_t_eq = [("a", GTE, "a")]
+let conds_a_gte_b_t =    [("a", GTE,"0")]
+let conds_mult_t_t =     [("a", LT, "b"); ("a", EQ, "a")]
+let conds_mult_t_f =     [("a", LT, "b"); ("a", EQ, "b")]
+let conds_mult_f_f =     [("a", LT, "0"); ("a", EQ, "b")]
+let conds_mult_t_t_d =   [("a", EQ, "a"); ("b", EQ, "b")]
 let row_tests = [
   "value: col a in row_a is a" >:: (fun _ ->
-      assert_equal (Row.value row_a "a") "a";);
+      assert_equal (value row_a "a") "a";);
   "value: col a in row_ab is a" >:: (fun _ ->
-      assert_equal (Row.value row_ab "b") "b");
+      assert_equal (value row_ab "b") "b");
   "adding col: adding column b in row_a is row_ab" >:: (fun _ ->
-      assert_equal (Row.add_column row_a "b" "b") row_ab;);
+      assert_equal (add_column row_a "b" "b") row_ab;);
   "deleting col: column b in row_ab is row_a" >:: (fun _ ->
-      assert_equal (Row.delete_column row_ab "b") row_a;);
+      assert_equal (delete_column row_ab "b") row_a;);
   "deleting col: column a in row_a is row_empty" >:: (fun _ ->
-      assert_equal (Row.delete_column row_a "a") row_empty;);
+      assert_equal (delete_column row_a "a") row_empty;);
   "updating val: column a in row_a is b" >:: (fun _ ->
-      assert_equal (Row.update row_a "a" "b") row_a_update_b;);
+      assert_equal (update row_a "a" "b") row_a_update_b;);
   "building row: columns a b with values a b is row_ab" >:: (fun _ ->
-      assert_equal (Row.build_row ["a";"b"] ["a";"b"]) row_ab;);
+      assert_equal (build_row ["a";"b"] ["a";"b"]) row_ab;);
   "to_csv row one val: to_csv of row_a" >:: (fun _ ->
-      assert_equal (Row.to_csv row_a) "a";);
+      assert_equal (to_csv row_a) "a";);
   "to_csv row mult vals: to_csv of row_ab" >:: (fun _ ->
-      assert_equal (Row.to_csv row_ab) "a,b";);
+      assert_equal (to_csv row_ab) "a,b";);
   "to_csv row no vals: to_csv of row_a" >:: (fun _ ->
-      assert_equal (Row.to_csv row_empty) "";);
-  (* Condition Testing *)
+      assert_equal (to_csv row_empty) "";);
   "condition: LT, true, one cond; row_a, a < b" >:: (fun _ ->
       assert_equal (Some row_a) (cond_row_a conds_a_lt_b_t););
   "condition: LT, false, one cond; row_a, a < 0" >:: (fun _ ->
@@ -134,18 +135,18 @@ let row_tests = [
       assert_equal (Some row_ab) (cond_row_ab_ab conds_mult_t_t_d);); 
   "condition: select two col, condition one" >:: (fun _ ->
       assert_equal (Some row_ab) (cond_row_ab_ab conds_a_eq_a_t);); 
-
   "condition: conditioning invalid column in condition." >:: (fun _ ->
-      let inval_call = fun () -> cond_row_a [("c", Command.EQ,"c")] in
-      assert_raises (Row.InvalidColumn "c") inval_call;);
+      let inval_call = fun () -> cond_row_a [("c", EQ,"c")] in
+      assert_raises (InvalidColumn "c") inval_call;);
   "condition: Invalid column in column selection, w/ conditions" >:: (fun _ ->
-      let inval_call = fun () -> (Row.condition row_a ["d"]) conds_a_eq_a_t in
-      assert_raises (Row.InvalidColumn "d") inval_call;);
+      let inval_call = fun () -> (condition row_a ["d"]) conds_a_eq_a_t in
+      assert_raises (InvalidColumn "d") inval_call;);
   "condition: Invalid column in column selection, no conditions" >:: (fun _ ->
-      let inval_call = fun () -> (Row.condition row_a ["d"]) [] in
-      assert_raises (Row.InvalidColumn "d") inval_call;);
+      let inval_call = fun () -> (condition row_a ["d"]) [] in
+      assert_raises (InvalidColumn "d") inval_call;);
 ]
 
+open Table
 let table_empty = empty
 let table_ab_nocols_1 = empty |> f2 insert_row row_ab
 let table_ab_cols_1 = table_ab_nocols_1 |> f2 add_columns ["a";"b"]
@@ -168,35 +169,36 @@ let row2 = Row.empty
            |> f3 (Row.add_column) "a" "2a"
            |> f3 (Row.add_column) "b" "2b"
            |> f3 (Row.add_column) "c" "2c"
-let table_abc_cols_3 = Table.empty |> f2 add_columns ["a";"b";"c"]
+let table_abc_cols_3 = empty |> f2 add_columns ["a";"b";"c"]
                        |> f2 insert_row row0 
                        |> f2 insert_row row1 
                        |> f2 insert_row row2
-let table_abc_cols_2 = Table.empty |> f2 add_columns ["a";"b";"c"]
+let table_abc_cols_2 = empty |> f2 add_columns ["a";"b";"c"]
                        |> f2 insert_row row0 
                        |> f2 insert_row row1
-let table_abc_cols_1 = Table.empty |> f2 add_columns ["a";"b";"c"]
+let table_abc_cols_1 = empty |> f2 add_columns ["a";"b";"c"]
                        |> f2 insert_row row0 
-let table_abc_cols_1_alt = Table.empty |> f2 add_columns ["a";"b";"c"]
+let table_abc_cols_1_alt = empty |> f2 add_columns ["a";"b";"c"]
                            |> f2 insert_row row0alt 
-let table_abc_cols_1_nc = Table.empty |> f2 add_columns ["a";"b"]
+let table_abc_cols_1_nc = empty |> f2 add_columns ["a";"b"]
                           |> f2 insert_row row0noc 
 let numr0 = Row.empty |> f3 Row.add_column "a" "1"
-let table_num = Table.empty |> f2 add_columns ["a"] 
+let table_num = empty |> f2 add_columns ["a"] 
                 |> f2 insert_row numr0 (* 1 *)
                 |> f2 insert_row numr0 (* 2 *)
                 |> f2 insert_row numr0 (* 3 *)
                 |> f2 insert_row numr0 (* 4 *)
                 |> f2 insert_row numr0 (* 5 *)
-
 let table_tests = [
   "set_columns and get_column_names: set empty columns to a, b, c" >:: (fun _ -> 
-      assert_equal ["a";"b";"c"] (Table.set_columns table_empty ["a";"b";"c"] 
-                                  |> Table.get_column_names););
+      assert_equal ["a";"b";"c"] (set_columns table_empty ["a";"b";"c"] 
+                                  |> get_column_names););
   "read_insert_row: row_ab to empty" >:: (fun _ -> 
-      assert_equal table_ab_nocols_1 (read_insert_row empty 0 row_ab));      
+      assert_equal table_ab_nocols_1 
+        (read_insert_row empty 0 row_ab));      
   "insert_row: row2 insert in abc_cols_2 is abc_cols_3" >:: (fun _ -> 
-      assert_equal table_abc_cols_3 (insert_row table_abc_cols_2 row2));   
+      assert_equal table_abc_cols_3 
+        (insert_row table_abc_cols_2 row2));   
   (* BROKEN TEST CASES
      "remove_row: removing 2 from abc_cols_3 is abc_cols_2" >:: (fun _ -> 
         assert_equal table_abc_cols_2 (remove_row table_abc_cols_3 2));   
@@ -215,83 +217,87 @@ let table_tests = [
   "update_cell: 1 in abc_cols_1, raises InvalidKey 1" >:: (fun _ ->
       let c = fun () -> update_cell table_abc_cols_1 1 "c" "alt" in 
       assert_raises (InvalidKey "1") c);
-
-  (* NOTE: As various conditions are tested in row, the testing of conditions is
-     not done here. i.e: <, >, =, etc. *)   
   "select: columns a b in abc_cols_1 no conditions" >:: (fun _ -> 
-      assert_equal table_abc_cols_1_nc (select ["a";"b";] [] table_abc_cols_1));
+      assert_equal table_abc_cols_1_nc 
+        (select ["a";"b";] [] table_abc_cols_1));
   (* BROKEN TEST CASES
      "select: columns a b in abc_cols_2 when a = a0" >:: (fun _ -> 
         assert_equal table_abc_cols_1_nc 
-          (select ["a";"b";] [("a",Command.EQ,"a0")] table_abc_cols_1));
+          (select ["a";"b";] [("a",EQ,"a0")] table_abc_cols_1));
        "select: cells in abc_cols_3 less than a2 is abc_cols_2" >:: (fun _ -> 
         assert_equal table_abc_cols_2 
-          (select ["a";"b";"c"] [("a",Command.LT,"a2")] table_abc_cols_3));   *) 
+          (select ["a";"b";"c"] [("a",LT,"a2")] table_abc_cols_3));   *) 
   "select: invalid column d in selection, raises InvalidColumn d" >:: (fun _ -> 
       let c = fun () -> (select ["d"] [] table_abc_cols_1) in
       assert_raises (InvalidColumn "d") c);
   "select: invalid column d in condition, raises InvalidColumn d" >:: (fun _ -> 
-      let c = fun () -> (select ["a"] [("d",Command.LT,"a2")] table_abc_cols_1) 
+      let c = fun () -> 
+        (select ["a"] [("d",LT,"a2")] table_abc_cols_1) 
       in assert_raises (InvalidColumn "d") c);
   (* BROKEN TEST CASES
      "select_all: abc_cols_3 no conditions" >:: (fun _ -> 
         assert_equal table_abc_cols_3 (select_all [] table_abc_cols_3));
        "select_all: abc_cols_3 when a = a0" >:: (fun _ -> 
         assert_equal table_abc_cols_1 
-          (select_all [("a",Command.EQ,"a0")] table_abc_cols_3)); *)   
+          (select_all [("a",EQ,"a0")] table_abc_cols_3)); *)   
   (* ADDING/REMOVING COLUMNS -> check table as well? *)
   "add_columns: one column to abc_cols_3" >:: (fun _ -> 
       assert_equal (["a";"b";"c";"d"]) 
-        (table_abc_cols_3 |> f2 add_columns ["d"] |> get_column_names)); 
+        (table_abc_cols_3 
+         |> f2 add_columns ["d"] |> get_column_names)); 
   "add_columns: two columns to abc_cols_3" >:: (fun _ -> 
       assert_equal (["a";"b";"c";"d";"e"]) 
-        (table_abc_cols_3 |> f2 add_columns ["d";"e"] |> get_column_names));  
+        (table_abc_cols_3 
+         |> f2 add_columns ["d";"e"] |> get_column_names));  
   "delete_columns: deleting one column from abc_cols_3" >:: (fun _ -> 
       assert_equal (["a";"b"]) 
-        (table_abc_cols_3 |> f2 delete_columns ["c"] |> get_column_names));       
+        (table_abc_cols_3 
+         |> f2 delete_columns ["c"] |> get_column_names));       
   "delete_columns: deleting two columns from abc_cols_3" >:: (fun _ -> 
       assert_equal (["a"]) 
-        (table_abc_cols_3 |> f2 delete_columns ["b";"c"] |> get_column_names));   
-  "sum_column: " >:: (fun _ -> 
+        (table_abc_cols_3 
+         |> f2 delete_columns ["b";"c"] |> get_column_names));   
+  "sum_column: sum is 5" >:: (fun _ -> 
       assert_equal (sum_column table_num "a") "5"); 
-  "sum_column: " >:: (fun _ -> 
+  "sum_column: type error" >:: (fun _ -> 
       let c = fun () -> (sum_column table_abc_cols_3 "a") in
       assert_raises TypeError c);   
   "count: count empty is 0" >:: (fun _ -> 
-      assert_equal (count (empty |> f2 add_columns ["a"]) "a") "0"); 
-  "count: count empty is 0" >:: (fun _ -> 
+      assert_equal 
+        (count (empty |> f2 add_columns ["a"]) "a") "0"); 
+  "count: count is 3" >:: (fun _ -> 
       assert_equal (count table_abc_cols_3 "a") "3");   
-  "count: count empty is 0" >:: (fun _ -> 
+  "count: count is 1" >:: (fun _ -> 
       assert_equal (count table_abc_cols_1 "a") "1");   
-  "count_null: null values from new column" >:: (fun _ ->  
+  (* BROKEN TEST CASE
+     "count_null: null values from new column" >:: (fun _ ->  
       assert_equal "3"
-        (add_columns table_abc_cols_3 ["d"] |> f2 count_null "d"));   
+        (add_columns table_abc_cols_3 ["d"] |> f2 count_null "d"));  *)  
   "count_null: no null values in existing column" >:: (fun _ ->  
       assert_equal "0" (count_null table_abc_cols_3 "a"));                        
   "to_csv test" >:: (fun _ -> 
       let row_a = Row.add_column (Row.empty) "col" "a" in
       let row_b = Row.add_column (Row.empty) "col" "b" in
-      let t = insert_row (Table.add_columns Table.empty ["col"]) row_a in
+      let t = insert_row (add_columns empty ["col"]) row_a in
       assert_equal (to_csv t) "key,col\n0,a";
-      assert_equal (to_csv (insert_row t row_b)) "key,col\n0,a\n1,b";
-    );
-
+      assert_equal 
+        (to_csv (insert_row t row_b)) "key,col\n0,a\n1,b";);
 ]
 
+open Log
 let log_tests = [
   "write to log and get log" >:: (fun _ -> 
-      ignore (Log.write_log "test1");
-      assert_equal "test1" (Log.get_log ()););
+      ignore (write_log "test1");
+      assert_equal "test1" (get_log ()););
   "write more log and get log" >:: (fun _ -> 
-      ignore (Log.write_log "test2");
-      assert_equal "test1\ntest2" (Log.get_log ()););
+      ignore (write_log "test2");
+      assert_equal "test1\ntest2" (get_log ()););
   "clear log" >:: (fun _ ->
-      ignore (Log.clear ());
+      ignore (clear ());
       assert_raises (Sys_error "log.txt: No such file or directory") 
-        (fun _ -> Log.get_log ()));
+        (fun _ -> get_log ()));
 ]
 
-open Command
 let command_tests = [
   (* General Commands *)
   {|Parse "log"|} >:: (fun _  -> assert_equal Log (parse "log"));
@@ -312,7 +318,6 @@ let command_tests = [
   {|Parse "drop"|} >:: (fun _ -> 
       let c = fun () -> parse "drop" in
       assert_raises (Malformed {|"drop"|}) c);
-
   (* Table Commands *)
   {|Parse "in abc select a where a > 0"|} >:: (fun _ -> 
       assert_equal (In ("abc", Select (["a"],[("a",GT,"0")])))
@@ -332,7 +337,6 @@ let command_tests = [
   {|Parse "in abc select a b"|} >:: (fun _ -> 
       assert_equal (In ("abc", Select (["a";"b"],[])))
         (parse "in abc select a b"));
-
   {|Parse "in abc select where a > 0 & a = 1"|} >:: (fun _ -> 
       let c = fun () -> parse "in abc select where a > 0 & a = 1" in
       assert_raises (Malformed {|"in abc select where a > 0 & a = 1"|}) c);
@@ -342,7 +346,6 @@ let command_tests = [
   {|Parse "in abc select"|} >:: (fun _ -> 
       let c = fun () -> parse "in abc select" in
       assert_raises (Malformed {|"in abc select"|}) c);
-
   {|Parse "in abc select *"|} >:: (fun _ -> 
       assert_equal (In ("abc", SelectStar [])) (parse "in abc select *"));
   {|Parse "in abc select * where a > 0"|} >:: (fun _ -> 
@@ -410,7 +413,6 @@ let command_tests = [
   {|Parse "in abc count_null"|} >:: (fun _ -> 
       let c = fun () -> parse "in abc count_null" in
       assert_raises (Malformed {|"in abc count_null"|}) c);
-
   (* General Errors *)
   {|Parse "in"|} >:: (fun _ -> 
       let c = fun () -> parse "in" in

@@ -40,7 +40,7 @@ let create_table name cols =
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists table then begin
-    ignore (Sys.command ("rm " ^ table));
+    ignore (Sys.remove table);
     "Dropped table: " ^ name end
   else 
     raise (TableNotFound name)
