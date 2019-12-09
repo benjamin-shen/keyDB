@@ -1,2 +1,2 @@
 (* Ben, Donal *)
-let hours_worked = [20; 20]
+let hours_worked = [35; 35]

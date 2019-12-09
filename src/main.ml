@@ -4,7 +4,7 @@ let rec list_to_string = function
   | [] -> ""
   | h::t -> h ^ " " ^ (list_to_string t)
 
-(** [run_dbms] runs the DBMS. *)
+(** [run_dbms] runs the DBMS in a REPL. *)
 let rec run_dbms () =
   print_newline ();
   print_string "> ";
@@ -159,5 +159,5 @@ let main () =
   print_endline {|Type "help" to see all the available commands.|};
   run_dbms ()
 
-(* Execute the dbms engine. *)
+(* Execute the main engine. *)
 let () = main ()
