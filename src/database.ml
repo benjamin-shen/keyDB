@@ -6,8 +6,10 @@ type t = unit
 
 exception TableNotFound of string
 exception TableExists of string
+exception ColumnExistsDB of string
 exception CorruptFile
 
+(** [dir] is the directory where your tables are stored. *)
 let dir = "databases"
 
 (** [list_to_csv cols] takes a string list and returns
@@ -18,14 +20,22 @@ let rec list_to_csv = function
   | h::t -> let r = list_to_csv t in 
     if r = "" then h else h ^ "," ^ r
 
+(** [dups_check checked lst] is the first duplicate found in [lst]. 
+    If no duplicate is found, the empty string is returned. *)
+let rec dups_check checked = function
+  | [] -> ""
+  | h::t -> if List.mem h checked then h else dups_check (h::checked) t
+
 let create_table name cols = 
   let file = (dir ^ Filename.dir_sep ^ name) in
   if Sys.file_exists file then
     raise (TableExists name)
-  else
-    ignore (Sys.command ("touch " ^ file));
-  ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
-  "Created table: " ^ name
+  else let s = (dups_check [] cols) in 
+    if s = "" then begin
+      ignore (Sys.command ("touch " ^ file));
+      ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
+      "Created table: " ^ name 
+    end else raise (ColumnExistsDB s)
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in

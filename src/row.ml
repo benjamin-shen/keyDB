@@ -33,11 +33,11 @@ let condition (r : t) (c : string list) (cd : Command.conditions) =
           | (col, op, v)::t -> 
             if List.mem_assoc col r then
               let rv = value r col in match op with 
-              | Command.LT  -> if rv < v then column_check acc' t else None
+              | Command.LT  -> if rv < v  then column_check acc' t else None
               | Command.LTE -> if rv <= v then column_check acc' t else None
-              | Command.EQ  -> if rv = v then column_check acc' t else None
+              | Command.EQ  -> if rv = v  then column_check acc' t else None
               | Command.NE  -> if rv <> v then column_check acc' t else None
-              | Command.GT  -> if rv > v then column_check acc' t else None
+              | Command.GT  -> if rv > v  then column_check acc' t else None
               | Command.GTE -> if rv >= v then column_check acc' t else None
             else raise (InvalidColumn col)
         in if (List.length cd) = 0 then

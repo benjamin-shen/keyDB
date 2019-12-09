@@ -34,9 +34,11 @@ type command =
 let log = "LOG"
 let undo = "UNDO"
 let quit = "QUIT"
+
 (* database commands *)
 let create = "CREATE [table] [cols]"
 let drop = "DROP [table]"
+
 (* table commands *)
 let select = "IN [table] SELECT [cols] (WHERE [conditions])?"
 let insert = "IN [table] INSERT [vals]"
@@ -51,6 +53,7 @@ let count_null = "IN [table] COUNT_NULL [col]"
 exception Empty
 
 type err = string
+
 exception Malformed of err
 
 (** [get_command input] is the [input] without white space. *)
@@ -79,7 +82,7 @@ let str_to_op = function
     ">" -> GT | ">=" -> GTE | "!=" | "!==" | "<>" -> NE |
     _ -> failwith "Invalid operator."
 
-(** [list_to_conditions acc conds]  *)
+(** [list_to_conditions acc conds] is the conditions represented by [conds]. *)
 let rec list_to_conditions acc = function
   | [] -> acc
   | col::op::value::[] -> (col, str_to_op op, value)::acc
@@ -167,10 +170,8 @@ let parse str =
     else
       match command_verb with
       | "create" -> if length < 2 then failwith "A table need column names."
-        else let cols = tail object_phrase in 
-          if has_dup [] cols then failwith "A table needs unique column names."
-          else Create {file = head object_phrase;
-                       cols = tail object_phrase;}
+        else Create {file = head object_phrase;
+                     cols = tail object_phrase;}
       | "drop" -> if length <> 1 then failwith "drop"
         else Drop (head object_phrase) 
       | "in" -> if length <= 2 then failwith "in"

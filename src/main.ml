@@ -128,6 +128,11 @@ let rec run_dbms () =
     print_string ("Table " ^ file ^ " already exists. ");
     print_endline ({|To overwrite it, first do "drop |} ^ file ^ {|".|});
     run_dbms ()
+  | Database.ColumnExistsDB col -> 
+    print_string ("Column " ^ col ^ " is repeated twice. ");
+    print_endline 
+      ({|Please attempt to create the table with a different column name.|});
+    run_dbms ()
   | Database.CorruptFile ->
     print_endline "The file is corrupted and can't be read as a table.";
     run_dbms ()
