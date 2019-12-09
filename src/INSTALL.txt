@@ -1,6 +1,11 @@
-1. Install `src.zip` and extract its contents
-2. Open the folder containing the extracted contents in your terminal
-3. Run `make dbms`
+1. Install `src.zip` and extract its contents.
+2. Open the folder containing the extracted contents in your terminal.
+3. Run `make dbms`.
+
+** The other make scripts are in Makefile. The relevant ones are:
+  `make test` - builds and runs our test suite
+  `make docs` - builds and creates the documentation
+  `make clean` - clears unnecessary files and deletes all stored data
 
 ** To cover most of our dbms's functionality, you can type:
   `help`
