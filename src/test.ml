@@ -1,28 +1,32 @@
 open OUnit2
 (* 
-    Testing for the DBMS.
-*)
-(* 
     Test plan: 
     Most of the testing was done first with black-box testing, and done so by 
     going through the various mli files and writing a set of tests for each 
     exposed function. Some of the more complex functions saw glass-box testing 
-    as well, as we understood the intricacies of them and what to look for
-    after working hard to get them to work.
+    as well, as we understood the intricacies of them and knew how to indirectly
+    test their helper functions.
 
     The modules tested using OUnit were Database, Log, Table, Row, and Command. 
     All the functions in these modules saw some degree of automatic testing here
-    in OUnit. Most of the integration testing, however, was done manually. This
-    included most of the actual calls into the repl and ensuring the entire 
-    system functioned as expected. 
+    in OUnit. The integration testing and testing in Main, however, was done 
+    manually. This was done by inputting commands in the REPL and ensuring the 
+    entire system functioned as expected.
 
-    We are confident that our testing confirms a correct system. Although we did
-    not automatically test integration, each function was tested on various 
-    inputs for both correct semantics and raising proper exceptions.
+    We are confident that our testing confirms a correct system. We 
+    automatically tested a significant number of test cases and playtested 
+    every new functionality thoroughly through the toplevel. Each non-abstract
+    function was tested on various inputs and we ensured that they had the 
+    correct semantics and raised the proper exceptions.
 
-    As a note, the testing for various WHERE conditions was written in row, not
-    Table. This is because the actual application of a condition occurs at the 
-    row level.
+    Notes:
+    - The testing for various WHERE conditions were written in Row, not Table. 
+      This is because the actual conditioning occurs at the row level.
+    - Running `make test` currently prints "rm: cannot remove 'databases/test': 
+      No such file or directory" because of Sys.command's error. We purposely 
+      throw and catch this error in a test case but can't prevent the printing 
+      to console. Sys.remove and Unix.unlink are not viable alternatives
+      because they cause issues across different operating systems.
 *)
 
 (** [f3 f a b t] is a simple composition function that calls [f] on [t] [a] [b],

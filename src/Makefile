@@ -15,9 +15,7 @@ build:
 	mkdir -p backup
 	touch log.txt
 
-test: clean test-suite clean
-
-test-suite: build
+test: clean build
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
 dbms: build
