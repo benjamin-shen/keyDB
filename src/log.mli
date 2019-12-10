@@ -2,6 +2,9 @@
    Logging of user inputs to the DBMS.
 *)
 
+(** Type [t] represents a log. *)
+type t
+
 (** [clear] deletes the log. *)
 val clear : unit -> unit
 

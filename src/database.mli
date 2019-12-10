@@ -23,7 +23,7 @@ exception CorruptFile
     Raises: [TableExists] if [name] already exists. 
 
     Raises: [DuplicateColumn] if [cols] has duplicates. *)
-val create_table : string -> string list -> string
+val create_table : string -> Command.column list -> string
 
 (** [drop_table name] will remove the table associated with [name] from
     the database.

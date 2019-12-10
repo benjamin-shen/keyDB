@@ -199,7 +199,7 @@ let table_tests = [
   "insert_row: row2 insert in abc_cols_2 is abc_cols_3" >:: (fun _ -> 
       assert_equal table_abc_cols_3 
         (insert_row table_abc_cols_2 row2));   
-  (* BROKEN TEST CASE 
+  (* TODO
        "remove_rows: removing rows 2, 1 from abc_cols_3 is abc_cols_1" >:: (fun _ -> 
         assert_equal table_abc_cols_1 (remove_rows table_abc_cols_3 [2;1]));  *)  
   "get_column: column a in abc_cols_1 is [(0,0a)]" >:: (fun _ -> 
@@ -218,7 +218,7 @@ let table_tests = [
   "select: columns a b in abc_cols_1 no conditions" >:: (fun _ -> 
       assert_equal table_abc_cols_1_nc 
         (select ["a";"b";] [] table_abc_cols_1));
-  (* BROKEN TEST CASES
+  (* TODO
      "select: columns a b in abc_cols_2 when a = a0" >:: (fun _ -> 
         assert_equal table_abc_cols_1_nc 
           (select ["a";"b";] [("a",EQ,"a0")] table_abc_cols_1));
@@ -232,13 +232,12 @@ let table_tests = [
       let c = fun () -> 
         (select ["a"] [("d",LT,"a2")] table_abc_cols_1) 
       in assert_raises (InvalidColumn "d") c);
-  (* BROKEN TEST CASES
+  (* TODO
      "select_all: abc_cols_3 no conditions" >:: (fun _ -> 
         assert_equal table_abc_cols_3 (select_all [] table_abc_cols_3));
        "select_all: abc_cols_3 when a = a0" >:: (fun _ -> 
         assert_equal table_abc_cols_1 
-          (select_all [("a",EQ,"a0")] table_abc_cols_3)); *)   
-  (* ADDING/REMOVING COLUMNS -> check table as well? *)
+          (select_all [("a",EQ,"a0")] table_abc_cols_3)); *)
   "add_columns: one column to abc_cols_3" >:: (fun _ -> 
       assert_equal (["a";"b";"c";"d"]) 
         (table_abc_cols_3 
@@ -267,7 +266,7 @@ let table_tests = [
       assert_equal (count table_abc_cols_3 "a") "3");   
   "count: count is 1" >:: (fun _ -> 
       assert_equal (count table_abc_cols_1 "a") "1");   
-  (* BROKEN TEST CASE
+  (* TODO
      "count_null: null values from new column" >:: (fun _ ->  
       assert_equal "3"
         (add_columns table_abc_cols_3 ["d"] |> f2 count_null "d"));  *)  
