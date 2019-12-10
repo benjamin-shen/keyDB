@@ -226,7 +226,7 @@ let table_tests = [
         (update_cell table_abc_cols_1 0 "c" "alt"));
   "update_cell: 1 in abc_cols_1, raises InvalidKey 1" >:: (fun _ ->
       let c = fun () -> update_cell table_abc_cols_1 1 "c" "alt" in 
-      assert_raises (InvalidKey "1") c);
+      assert_raises (InvalidKey 1) c);
   "select: columns a b in abc_cols_1 no conditions" >:: (fun _ -> 
       assert_equal table_abc_cols_1_nc 
         (select ["a";"b";] [] table_abc_cols_1));

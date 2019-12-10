@@ -109,7 +109,7 @@ let rec run_dbms () =
     print_endline "Column values must be non-null ints/floats.";
     run_dbms ()
   | Table.InvalidKey k -> 
-    print_endline ("The key: " ^ k ^ " is invalid.");
+    print_endline ("The key: " ^ string_of_int k ^ " is invalid.");
     run_dbms ()
   | Table.InvalidColumn c -> 
     print_endline ("Invalid column " ^ c ^ ".");

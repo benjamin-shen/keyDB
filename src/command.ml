@@ -138,7 +138,8 @@ let rec has_dup acc = function
 
 let parse str =
   let trim = String.trim str in
-  let clean = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" trim in
+  let clean = 
+    Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" trim in
   let str = Str.global_replace (Str.regexp "[ \n\r\x0c\t]+") " " clean in
   let failure = {|"|} ^ str ^ {|"|} in
   try 

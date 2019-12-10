@@ -6,13 +6,13 @@
 type t
 
 (** Raised when column already exists. *)
-exception ColumnExists of string
+exception ColumnExists of Command.column
 
 (** Raised when column doesn't exist. *)
-exception InvalidColumn of string
+exception InvalidColumn of Command.column
 
 (** Raised when key doesn't exist. *)
-exception InvalidKey of string
+exception InvalidKey of Command.key
 
 (** Raised when column values aren't all ints or all floats. *)
 exception TypeError
@@ -73,10 +73,10 @@ val select_all : Command.condition list -> t -> t
 val sum_column : t -> Command.column -> string
 
 (** [count t c] counts the non-null values of column [col] in table [t]. *)
-val count : t -> string -> string
+val count : t -> Command.column -> string
 
 (** [count_null t c] counts the null values of column [col] in table [t]. *)
-val count_null : t -> string -> string
+val count_null : t -> Command.column -> string
 
 (** [to_csv t] converts table [t] into a csv string. *)
 val to_csv : t -> string

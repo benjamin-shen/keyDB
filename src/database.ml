@@ -29,7 +29,8 @@ let create_table name cols =
   else let s = (dups_check [] cols) in 
     if s = "" then begin
       ignore (Sys.command ("touch " ^ file));
-      ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
+      ignore 
+        (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
       "Created table: " ^ name 
     end else raise (DuplicateColumn s)
 

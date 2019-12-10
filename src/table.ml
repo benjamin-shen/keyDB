@@ -1,6 +1,6 @@
-exception ColumnExists of string
-exception InvalidColumn of string
-exception InvalidKey of string
+exception ColumnExists of Command.column
+exception InvalidColumn of Command.column
+exception InvalidKey of Command.key
 exception TypeError
 
 (** A record holding the table's highest key, column names, and rows. *)
@@ -62,7 +62,7 @@ let get_column t c =
 
 let update_cell t k c v = 
   if not (List.mem_assoc k t.table) 
-  then raise (InvalidKey (string_of_int k)) else
+  then raise (InvalidKey k) else
     {
       key = t.key;
       columns = t.columns;
