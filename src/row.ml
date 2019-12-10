@@ -15,7 +15,7 @@ let rec update r c v = match r with
   | [] -> []
   | h::t -> if (fst h)=c then (c,v)::update t c v else h::update t c v
 
-let condition (r : t) (c : string list) (cd : Command.conditions) = 
+let condition (r : t) (c : string list) (cd : Command.condition list) = 
   (* [condition_cols acc c] goes through the columns in [c], 
      checks if the column from the row satisfies all conditions from [cd], 
      adds the column to the new row [acc] if so,

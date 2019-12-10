@@ -5,11 +5,10 @@ type column = string
 type value = string
 type operator = LT | LTE | EQ | NE | GT | GTE 
 type condition = (column * operator * value)
-type conditions = condition list
 
 type table_command =
-  | Select of column list*conditions
-  | SelectStar of conditions
+  | Select of column list*condition list
+  | SelectStar of condition list
   | Insert of value list
   | Remove of key list
   | Add    of column list
@@ -30,33 +29,11 @@ type command =
   | Drop   of filename
   | In     of filename*table_command
 
-(* main commands *)
-let log = "LOG"
-let undo = "UNDO"
-let quit = "QUIT"
-
-(* database commands *)
-let create = "CREATE [table] [cols]"
-let drop = "DROP [table]"
-
-(* table commands *)
-let select = "IN [table] SELECT [cols] (WHERE [conditions])?"
-let insert = "IN [table] INSERT [vals]"
-let remove = "IN [table] REMOVE [keys]"
-let add = "IN [table] ADD [cols]"
-let delete = "IN [table] DELETE [cols]"
-let update = "IN [table] UPDATE [key] [col] [val]"
-let sum = "IN [table] SUM [col]"
-let count = "IN [table] COUNT [col]"
-let count_null = "IN [table] COUNT_NULL [col]"
-
 exception Empty
 
-type err = string
+exception Malformed of string
 
-exception Malformed of err
-
-(** [get_command input] is the [input] without white space. *)
+(** [get_command input] is the list [input] with empty spaces removed. *)
 let rec get_command (input:string list) : string list =
   match input with
   | [] -> []
@@ -75,14 +52,20 @@ let rec tail (input:string list) : object_phrase =
   | [] -> []
   | _::t -> t
 
-(** [str_to_op s] will take the string [s] and return the associated condition
-    type. *)
+(** [str_to_op s] will take the string [s] and return 
+    the associated operator. 
+    Raises: [Failure "Invalid operator"] if [s] cannot be interpreted as 
+    an operator. *)
 let str_to_op = function 
     "<" -> LT | "<=" -> LTE | "=" | "==" -> EQ |
     ">" -> GT | ">=" -> GTE | "!=" | "!==" | "<>" -> NE |
     _ -> failwith "Invalid operator."
 
-(** [list_to_conditions acc conds] is the conditions represented by [conds]. *)
+(** [list_to_conditions acc conds] is the conditions represented by [conds]. 
+    [conds] must be able to be split into individual conditions with boolean
+    separator &.
+    Raises: [Failure "Invalid conditions"] if [conds] cannot be interpreted as 
+    conditions. *)
 let rec list_to_conditions acc = function
   | [] -> acc
   | col::op::value::[] -> (col, str_to_op op, value)::acc
@@ -90,8 +73,10 @@ let rec list_to_conditions acc = function
     list_to_conditions ((col, str_to_op op, value)::acc) t
   | _ -> failwith "Invalid condition."
 
-(** [select_where input] turns [input] into a select table command. *)
-let select_where (input:string list) =
+(** [select_where input] turns [input] into a select table command. 
+    Raises: [Failure] if [input] cannot be interpreted as 
+    a select table command. *)
+let select_where input =
   match input with
   | [] -> failwith "select_where"
   | h::t -> 
@@ -116,8 +101,10 @@ let select_where (input:string list) =
             | _ -> failwith "not select"
       in select_builder (Select ([],[])) true (h::t)
 
-(** [table_command input] is the table command represented by [input]. *)
-let table_command (input:string list) : table_command =
+(** [table_command input] is the table command represented by [input]. 
+    Raises: [Failure] if [input] cannot be interpreted as 
+    a table command. *)
+let table_command input =
   let command_verb = head input in 
   let object_phrase = tail input in 
   let length = List.length object_phrase in 
@@ -126,16 +113,16 @@ let table_command (input:string list) : table_command =
   | "insert" -> Insert object_phrase
   | "remove" -> begin try 
         let keys = List.rev_map int_of_string object_phrase in Remove keys
-      with _ -> failwith "Keys should be ints." end
+      with _ -> failwith "Keys are not ints." end
   | "add" -> Add object_phrase
   | "delete" -> Delete object_phrase
   | "update" -> begin match object_phrase with
-      | k::c::v::[] -> begin try
+      | [k;c;v] -> begin try
             let key = int_of_string k in Update {key;
                                                  col = c;
                                                  value = v}
           with _ -> failwith "Key is not an int." end
-      | _ -> failwith "Incorrect update syntax." end
+      | _ -> failwith "update" end
   | "sum" -> if length > 1 then failwith "sum"
     else Sum (head object_phrase)
   | "count" -> if length > 1 then failwith "count"
@@ -147,11 +134,11 @@ let table_command (input:string list) : table_command =
 (** [has_dup lst] returns whether a list has duplicates. *)
 let rec has_dup acc = function
   | [] | [_] -> false
-  | h::t -> not (List.mem h acc) 
-            && not (has_dup (h::acc) t)
+  | h::t -> not (List.mem h acc) && not (has_dup (h::acc) t)
 
 let parse str =
-  let clean = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" str in
+  let trim = String.trim str in
+  let clean = Str.global_replace (Str.regexp "[^a-zA-Z0-9* _.<>!=&]+") "" trim in
   let str = Str.global_replace (Str.regexp "[ \n\r\x0c\t]+") " " clean in
   let failure = {|"|} ^ str ^ {|"|} in
   try 
@@ -169,7 +156,7 @@ let parse str =
       | _ -> failwith "Empty object phrase."
     else
       match command_verb with
-      | "create" -> if length < 2 then failwith "A table need column names."
+      | "create" -> if length < 2 then failwith "create"
         else Create {file = head object_phrase;
                      cols = tail object_phrase;}
       | "drop" -> if length <> 1 then failwith "drop"
@@ -182,6 +169,23 @@ let parse str =
   | _ -> raise (Malformed failure)
 
 let help () =
+  (* main commands *)
+  let log = "LOG" in (*
+  let undo = "UNDO" in *)
+  let quit = "QUIT" in
+  (* database commands *)
+  let create = "CREATE [table] [cols]" in
+  let drop = "DROP [table]" in
+  (* table commands *)
+  let select = "IN [table] SELECT [cols] (WHERE [conditions])?" in
+  let insert = "IN [table] INSERT [vals]" in
+  let remove = "IN [table] REMOVE [keys]" in
+  let add = "IN [table] ADD [cols]" in
+  let delete = "IN [table] DELETE [cols]" in
+  let update = "IN [table] UPDATE [key] [col] [val]" in
+  let sum = "IN [table] SUM [col]" in
+  let count = "IN [table] COUNT [col]" in
+  let count_null = "IN [table] COUNT_NULL [col]" in
   "Database commands:\n" ^
   create ^ "\n  creates a new table [table] with column [cols]. 
   The columns must be unique. \n" ^

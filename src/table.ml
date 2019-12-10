@@ -42,7 +42,7 @@ let read_insert_row t k r = {
   table = t.table @ [(k,r)]
 }
 
-let insert_row t r =  {
+let insert_row t r = {
   key = t.key + 1;
   columns = t.columns;
   table = t.table @ [(t.key + 1,r)]

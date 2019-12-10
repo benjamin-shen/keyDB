@@ -12,7 +12,7 @@ exception TableNotFound of string
 exception TableExists of string
 
 (** Raised when attempting to create a table with duplicate columns.  *)
-exception ColumnExistsDB of string
+exception DuplicateColumn of string
 
 (** Raised when the csv is corrupted and can't be read as a table. *)
 exception CorruptFile

@@ -128,7 +128,7 @@ let rec run_dbms () =
     print_string ("Table " ^ file ^ " already exists. ");
     print_endline ({|To overwrite it, first do "drop |} ^ file ^ {|".|});
     run_dbms ()
-  | Database.ColumnExistsDB col -> 
+  | Database.DuplicateColumn col -> 
     print_string ("Column " ^ col ^ " is repeated twice. ");
     print_endline 
       ({|Please attempt to create the table with a different column name.|});

@@ -46,10 +46,10 @@ val update_cell : t -> int -> string -> string -> t
 (** [select c cd t] finds the rows in [t] that satisfy the conditions [cd] and
     returns a table containing these rows with columns [c].
     Raises: InvalidColumn if a column in [c] or [cd] are not present in [t]. *)
-val select : string list -> Command.conditions -> t -> t
+val select : string list -> Command.condition list -> t -> t
 
 (** [select_all cd t] finds the rows in [t] that satisfy the conditions [cd]. *)
-val select_all : Command.conditions -> t -> t
+val select_all : Command.condition list -> t -> t
 
 (** [add_columns t c] adds columns [cols] to the end of a table [t] and returns
     a table with the specified columns. *)

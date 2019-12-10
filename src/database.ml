@@ -6,7 +6,7 @@ type t = unit
 
 exception TableNotFound of string
 exception TableExists of string
-exception ColumnExistsDB of string
+exception DuplicateColumn of string
 exception CorruptFile
 
 (** [dir] is the directory where your tables are stored. *)
@@ -35,7 +35,7 @@ let create_table name cols =
       ignore (Sys.command ("touch " ^ file));
       ignore (Sys.command ({|echo "key,|} ^ list_to_csv cols ^ {|" > |} ^ file));
       "Created table: " ^ name 
-    end else raise (ColumnExistsDB s)
+    end else raise (DuplicateColumn s)
 
 let drop_table name = 
   let table = (dir ^ Filename.dir_sep ^ name) in

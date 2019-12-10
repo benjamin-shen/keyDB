@@ -21,7 +21,7 @@ val delete_column : t -> string -> t
 
 (** [condition r c cd] is  the row [r] with only columns [c] or None if
     the conditions [cd] are not met. *)
-val condition : t -> string list -> Command.conditions -> t option
+val condition : t -> string list -> Command.condition list -> t option
 
 (** [add_row cs vs] will create a new row with values [vs] associated with
   * the columns [cs] respectively. 
