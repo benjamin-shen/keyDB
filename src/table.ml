@@ -176,7 +176,7 @@ let sum_column t c =
     an empty value. *)
 let rec lst_count_null = function
   | [] -> 0
-  | (_,v)::t -> if v=null then 1 else 0 + lst_count_null t
+  | (_,v)::t -> (if v=null then 1 else 0) + lst_count_null t
 
 let count t c =
   let col = get_column t c in

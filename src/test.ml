@@ -184,31 +184,32 @@ let table_abc_cols_1_nc = empty |> f2 add_columns ["a";"b"]
                           |> f2 insert_row row0noc 
 let numr0 = Row.empty |> f3 Row.add_column "a" "1"
 let table_num = empty |> f2 add_columns ["a"] 
+                |> f2 insert_row numr0 (* 0 *)
                 |> f2 insert_row numr0 (* 1 *)
                 |> f2 insert_row numr0 (* 2 *)
                 |> f2 insert_row numr0 (* 3 *)
                 |> f2 insert_row numr0 (* 4 *)
-                |> f2 insert_row numr0 (* 5 *)
 let table_tests = [
   "set_columns and get_column_names: set empty columns to a, b, c" >:: (fun _ -> 
       assert_equal ["a";"b";"c"] (set_columns table_empty ["a";"b";"c"] 
                                   |> get_column_names););
   "read_insert_row: row_ab to empty" >:: (fun _ -> 
       assert_equal table_ab_nocols_1 
-        (read_insert_row empty 0 row_ab));      
+        (read_insert_row empty 0 row_ab));
   "insert_row: row2 insert in abc_cols_2 is abc_cols_3" >:: (fun _ -> 
       assert_equal table_abc_cols_3 
-        (insert_row table_abc_cols_2 row2));   
-  (* TODO
-       "remove_rows: removing rows 2, 1 from abc_cols_3 is abc_cols_1" >:: (fun _ -> 
-        assert_equal table_abc_cols_1 (remove_rows table_abc_cols_3 [2;1]));  *)  
+        (insert_row table_abc_cols_2 row2));
+  "remove_rows: removing rows 1, 2 from abc_cols_3 is abc_cols_1" >:: (fun _ -> 
+      (* to_csv updates the key *)
+      assert_equal (to_csv table_abc_cols_1)
+        (to_csv (remove_rows table_abc_cols_3 [1;2])));
   "get_column: column a in abc_cols_1 is [(0,0a)]" >:: (fun _ -> 
       assert_equal [(0,"0a")] (get_column table_abc_cols_1 "a"));
   "get_column: column b in abc_cols_2 is [(0,0b);(1,1b)]" >:: (fun _ -> 
       assert_equal [(0,"0b");(1,"1b")] (get_column table_abc_cols_2 "b"));
   "get_column: e in abc_cols_1, raises InvalidColumn e" >:: (fun _ ->
       let c = fun () -> get_column table_abc_cols_1 "e" in 
-      assert_raises (InvalidColumn "e") c);    
+      assert_raises (InvalidColumn "e") c);
   "update_cell: " >:: (fun _ -> 
       assert_equal table_abc_cols_1_alt 
         (update_cell table_abc_cols_1 0 "c" "alt"));
@@ -218,13 +219,13 @@ let table_tests = [
   "select: columns a b in abc_cols_1 no conditions" >:: (fun _ -> 
       assert_equal table_abc_cols_1_nc 
         (select ["a";"b";] [] table_abc_cols_1));
-  (* TODO
-     "select: columns a b in abc_cols_2 when a = a0" >:: (fun _ -> 
-        assert_equal table_abc_cols_1_nc 
-          (select ["a";"b";] [("a",EQ,"a0")] table_abc_cols_1));
-       "select: cells in abc_cols_3 less than a2 is abc_cols_2" >:: (fun _ -> 
-        assert_equal table_abc_cols_2 
-          (select ["a";"b";"c"] [("a",LT,"a2")] table_abc_cols_3));   *) 
+  "select: columns a b in abc_cols_2 when a = 0a" >:: (fun _ -> 
+      assert_equal table_abc_cols_1_nc 
+        (select ["a";"b";] [("a",EQ,"0a")] table_abc_cols_1));
+  "select: cells in abc_cols_3 less than a2 is abc_cols_2" >:: (fun _ -> 
+      (* to_csv updates the key *)
+      assert_equal (to_csv table_abc_cols_2)
+        (to_csv (select ["a";"b";"c"] [("a",LT,"2a")] table_abc_cols_3)));
   "select: invalid column d in selection, raises InvalidColumn d" >:: (fun _ -> 
       let c = fun () -> (select ["d"] [] table_abc_cols_1) in
       assert_raises (InvalidColumn "d") c);
@@ -232,12 +233,13 @@ let table_tests = [
       let c = fun () -> 
         (select ["a"] [("d",LT,"a2")] table_abc_cols_1) 
       in assert_raises (InvalidColumn "d") c);
-  (* TODO
-     "select_all: abc_cols_3 no conditions" >:: (fun _ -> 
-        assert_equal table_abc_cols_3 (select_all [] table_abc_cols_3));
-       "select_all: abc_cols_3 when a = a0" >:: (fun _ -> 
-        assert_equal table_abc_cols_1 
-          (select_all [("a",EQ,"a0")] table_abc_cols_3)); *)
+  "select_all: abc_cols_3 no conditions" >:: (fun _ -> 
+      (* to_csv updates the key *)
+      assert_equal (to_csv table_abc_cols_3)
+        (to_csv (select_all [] table_abc_cols_3)));
+  "select_all: abc_cols_3 when a = 0a" >:: (fun _ -> 
+      assert_equal table_abc_cols_1 
+        (select_all [("a",EQ,"0a")] table_abc_cols_3));
   "add_columns: one column to abc_cols_3" >:: (fun _ -> 
       assert_equal (["a";"b";"c";"d"]) 
         (table_abc_cols_3 
@@ -265,13 +267,12 @@ let table_tests = [
   "count: count is 3" >:: (fun _ -> 
       assert_equal (count table_abc_cols_3 "a") "3");   
   "count: count is 1" >:: (fun _ -> 
-      assert_equal (count table_abc_cols_1 "a") "1");   
-  (* TODO
-     "count_null: null values from new column" >:: (fun _ ->  
-      assert_equal "3"
-        (add_columns table_abc_cols_3 ["d"] |> f2 count_null "d"));  *)  
+      assert_equal (count table_abc_cols_1 "a") "1");
+  "count_null: null values from new column" >:: (fun _ ->  
+      assert_equal ~printer:(fun x -> x) "3"
+        (add_columns table_abc_cols_3 ["d"] |> f2 count_null "d")); 
   "count_null: no null values in existing column" >:: (fun _ ->  
-      assert_equal "0" (count_null table_abc_cols_3 "a"));                        
+      assert_equal "0" (count_null table_abc_cols_3 "a"));
   "to_csv test" >:: (fun _ -> 
       let row_a = Row.add_column (Row.empty) "col" "a" in
       let row_b = Row.add_column (Row.empty) "col" "b" in

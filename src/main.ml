@@ -80,13 +80,17 @@ let rec run_dbms () =
         let table = Database.read file in 
         Table.add_columns table columns
         |> Database.write file
-        |> print_endline
+        |> print_endline;
+        Log.write_log
+          ("in " ^ file ^ " add " ^ (list_to_string columns))
       end; run_dbms () 
     | In (file, Delete columns) -> begin
         let table = Database.read file in
         Table.delete_columns table columns
         |> Database.write file
-        |> print_endline
+        |> print_endline;
+        Log.write_log
+          ("in " ^ file ^ " delete " ^ (list_to_string columns))
       end; run_dbms ()
     | In (file, Sum col) -> begin
         let table = Database.read file in
@@ -102,7 +106,7 @@ let rec run_dbms () =
       end; run_dbms ()
   with 
   | Table.TypeError -> 
-    print_endline "Column values must be ints/floats.";
+    print_endline "Column values must be non-null ints/floats.";
     run_dbms ()
   | Table.InvalidKey k -> 
     print_endline ("The key: " ^ k ^ " is invalid.");
