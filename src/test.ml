@@ -10,32 +10,32 @@ let f2 f a t = f t a
 open Database
 let database_tests =  [
   "create drop table test" >:: (fun _ -> 
-      (try ignore (Database.create_table "test" ["t";"e";"st"]); ()
+      (try ignore (create_table "test" ["t";"e";"st"]); ()
        with _ -> failwith "create");
-      (try ignore (Database.drop_table "test"); ()
+      (try ignore (drop_table "test"); ()
        with _ -> failwith "drop");
     );
   "fail create test" >:: (fun _ -> 
       let file = "test" in
-      assert_raises (Database.TableExists(file)) 
+      assert_raises (TableExists file) 
         (fun _ -> 
-           ignore (Database.create_table file ["t";"e";"st"]);
-           ignore (Database.create_table file ["t";"e";"st"]););
-      ignore (Database.drop_table file);
+           ignore (create_table file ["t";"e";"st"]);
+           ignore (create_table file ["t";"e";"st"]););
+      ignore (drop_table file);
     );
   "fail drop test" >:: (fun _ -> 
       let file = "nonexistent" in
-      assert_raises (Database.TableNotFound(file)) 
+      assert_raises (TableNotFound file) 
         (fun _ -> 
-           ignore (Database.drop_table file));
+           ignore (drop_table file));
     );
-  "read test" >:: (fun _ -> 
+  "read write test" >:: (fun _ -> 
       let file = "test" in
       try
-        ignore (Database.create_table file ["t";"e";"st"]);
-        (*TODO*)
-        ignore (Database.drop_table file);
-      with _ -> failwith "read"
+        ignore (create_table file ["t";"e";"st"]);
+        assert_equal (write file (read file)) "key,t,e,st";
+        ignore (drop_table file);
+      with _ -> failwith "read write"
     );
 ]
 

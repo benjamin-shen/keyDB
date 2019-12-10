@@ -1,5 +1,5 @@
 (** 
-   Log user inputs to the DBMS.
+   Logging of user inputs to the DBMS.
 *)
 
 (** [clear] deletes the log. *)
@@ -11,5 +11,6 @@ val write_log : string -> unit
 (** [get_log] returns a string of the log. *)
 val get_log : unit -> string
 
-(** [undo] undos the most recent logged command. *)
+(** Not implemented yet;
+    [undo] will undo the most recent logged command. *)
 val undo: unit -> string

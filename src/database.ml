@@ -1,7 +1,3 @@
-type key = int
-type column = string
-type value = string
-
 type t = unit
 
 exception TableNotFound of string
@@ -55,7 +51,8 @@ let rec row_builder vals header acc =
       row_builder t (List.tl header) (Row.add_column acc (List.hd header) h)
   else raise CorruptFile
 
-(** [table_builder c header acc] will copy each line in [c] to the table [acc]. *)
+(** [table_builder c header acc] creates a table by adding each line in [c] 
+    to the table [acc]. *)
 let rec table_builder c header acc = 
   try  
     let line = input_line c |> String.trim |> String.split_on_char ',' in 
@@ -73,6 +70,7 @@ let read (filename : string) : Table.t =
     table_builder channel header Table.empty
   with
   | Sys_error _ -> raise (TableNotFound filename)
+  | CorruptFile -> raise CorruptFile
 
 let write filename table =
   let file = dir ^ Filename.dir_sep ^ filename in

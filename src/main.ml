@@ -1,3 +1,8 @@
+(**
+   The main engine for keyDB, 
+   a console-based Database Management System (DBMS) built in OCaml.
+*)
+
 (** [list_to_string lst] converts string list [lst] to a string with a space
     separating each element. *)
 let rec list_to_string = function
@@ -152,7 +157,7 @@ let rec run_dbms () =
     print_endline {|Error. Type "help" or "quit".|};
     run_dbms ()
 
-(** [main ()] prints initial instructions, then runs the DBMS. *)
+(** [main] prints initial instructions, then runs the DBMS. *)
 let main () =
   ANSITerminal.(print_string [green]
                   "\nWelcome to keyDB, a DBMS that handles SQL queries.\n");

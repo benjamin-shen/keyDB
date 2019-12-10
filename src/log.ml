@@ -1,3 +1,4 @@
+(** [log] is the relative file name of the log. *)
 let log = "log.txt"
 
 let clear () = 

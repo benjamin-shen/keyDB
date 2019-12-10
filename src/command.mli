@@ -65,5 +65,5 @@ exception Malformed of string
     Raises: [Malformed] if the command cannot be parsed. *)
 val parse : string -> command
 
-(** [help ()] returns the help message string. *)
+(** [help] returns the help message string. *)
 val help : unit -> string
