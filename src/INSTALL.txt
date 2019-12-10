@@ -3,7 +3,7 @@
 3. Run `make dbms`.
 
 ** The other make scripts are in Makefile:
-  `make test`  - cleans, builds, runs our test suite, and cleans again
+  `make test`  - cleans, builds, and runs our test suite
   `make docs`  - builds, and creates the documentation
   `make clean` - clears unnecessary files and deletes all stored data
 
