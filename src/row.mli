@@ -41,7 +41,7 @@ val condition : t -> Command.column list -> Command.condition list -> t option
 
     Raises: [ValueMismatch len] if the length [len] of [cs] and [vs] 
     are not equal. *)
-val build_row : string  list -> string list -> t
+val build_row : string list -> string list -> t
 
 (** [to_csv r] converts row [r] to a csv string consisting of its values. *)
 val to_csv : t -> string

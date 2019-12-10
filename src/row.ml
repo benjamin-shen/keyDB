@@ -16,37 +16,45 @@ let rec update r c v = match r with
   | [] -> []
   | h::t -> if (fst h)=c then (c,v)::update t c v else h::update t c v
 
-let condition (r : t) (c : string list) (cd : Command.condition list) = 
-  (** [condition_cols acc c] goes through the columns in [c], 
-      checks if the column from the row satisfies all conditions from [cd], 
-      adds the column to the new row [acc] if so,
-      otherwise stops the function and returns none. *)
-  let rec condition_cols acc = function
-    | [] -> Some acc
-    | hcol::tcol -> 
-      try
-        (** [column_check acc cd] goes through the conditions for a column,
-            checks if the column is a part of the condition,
-            if not adds the column, if it is manages the condition
-            if condition satisfied, add column, otherwise stop and return none *)
-        let rec column_check acc' = function
-          | [] -> condition_cols (add_column acc' hcol (value r hcol)) tcol
-          | (col, op, v)::t -> 
-            if List.mem_assoc col r then
-              let rv = value r col in match op with 
-              | Command.LT  -> if rv < v  then column_check acc' t else None
-              | Command.LTE -> if rv <= v then column_check acc' t else None
-              | Command.EQ  -> if rv = v  then column_check acc' t else None
-              | Command.NE  -> if rv <> v then column_check acc' t else None
-              | Command.GT  -> if rv > v  then column_check acc' t else None
-              | Command.GTE -> if rv >= v then column_check acc' t else None
-            else raise (InvalidColumn col)
-        in if (List.length cd) = 0 then
-          condition_cols (add_column acc hcol (value r hcol)) tcol
-        else column_check acc cd
-      with
-      | Not_found -> raise (InvalidColumn hcol)
-  in condition_cols empty c
+(** [compare_bool rv v op] is the result of comparing [rv] and [v]
+    with [op]. *)
+let compare_bool rv v = function
+  | Command.LT -> rv < v
+  | Command.LTE -> rv <= v
+  | Command.EQ -> rv = v
+  | Command.NE -> rv <> v
+  | Command.GT -> rv > v
+  | Command.GTE -> rv >= v
+
+(** [condition_cols r c cd acc] goes through the columns in [c], 
+    checks if the column from the row satisfies all conditions from [cd], 
+    adds the column to the new row [acc] if so,
+    otherwise stops the function and returns [None]. *)
+let rec condition_cols r c cd acc = 
+  match c with
+  | [] -> Some acc
+  | hcol::tcol -> 
+    try
+      (** [column_check acc cd] goes through the conditions for a column,
+          checks if the column is a part of the condition,
+          if not adds the column, if it is manages the condition
+          if condition satisfied, add column, otherwise stop and 
+          return [None] *)
+      let rec column_check acc' = function
+        | [] -> condition_cols r tcol cd (add_column acc' hcol (value r hcol))
+        | (col, op, v)::t -> 
+          if List.mem_assoc col r then
+            let rv = value r col in 
+            let compare = compare_bool rv v op
+            in if compare then column_check acc' t else None
+          else raise (InvalidColumn col)
+      in if (List.length cd) = 0 then
+        condition_cols r tcol cd (add_column acc hcol (value r hcol))
+      else column_check acc cd
+    with
+    | Not_found -> raise (InvalidColumn hcol)
+
+let condition r c cd = condition_cols r c cd empty
 
 let build_row cs vs = 
   let len = List.length cs in
