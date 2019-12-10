@@ -1,4 +1,29 @@
 open OUnit2
+(* 
+    Testing for the DBMS.
+*)
+(* 
+    Test plan: 
+    Most of the testing was done first with black-box testing, and done so by 
+    going through the various mli files and writing a set of tests for each 
+    exposed function. Some of the more complex functions saw glass-box testing 
+    as well, as we understood the intricacies of them and what to look for
+    after working hard to get them to work.
+
+    The modules tested using OUnit were Database, Log, Table, Row, and Command. 
+    All the functions in these modules saw some degree of automatic testing here
+    in OUnit. Most of the integration testing, however, was done manually. This
+    included most of the actual calls into the repl and ensuring the entire 
+    system functioned as expected. 
+
+    We are confident that our testing confirms a correct system. Although we did
+    not automatically test integration, each function was tested on various 
+    inputs for both correct semantics and raising proper exceptions.
+
+    As a note, the testing for various WHERE conditions was written in row, not
+    Table. This is because the actual application of a condition occurs at the 
+    row level.
+*)
 
 (** [f3 f a b t] is a simple composition function that calls [f] on [t] [a] [b],
     in that order. *)
@@ -9,6 +34,9 @@ let f2 f a t = f t a
 
 open Database
 let database_tests =  [
+  (*   "clean databases" >:: (fun _ -> 
+        ignore (Sys.command "rm -r databases");
+        ignore (Sys.command "mkdir databases")); *)
   "create drop table test" >:: (fun _ -> 
       (try ignore (create_table "test" ["t";"e";"st"]); ()
        with _ -> failwith "create");
@@ -52,24 +80,6 @@ let cond_row_a =         condition row_a ["a"]
 let cond_row_ab_a =      condition row_ab ["a"]
 let cond_row_ab_ab =     condition row_ab ["a";"b"]
 let cond_row_ab_b =      condition row_ab ["b"]
-let conds_a_lt_b_t =     [("a", LT, "b")]
-let conds_a_lt_b_f =     [("a", LT, "0")]
-let conds_a_lte_b_t =    [("a", LTE, "b")]
-let conds_a_lte_b_t_eq = [("a", LTE, "a")]
-let conds_a_lte_b_f =    [("a", LTE,"0")]
-let conds_a_eq_a_t =     [("a", EQ, "a")]
-let conds_a_eq_b_f =     [("a", EQ, "b")]
-let conds_a_ne_b_t =     [("a", NE, "b")]
-let conds_a_ne_a_f =     [("a", NE, "a")]
-let conds_a_gt_b_f =     [("a", GT, "b")]
-let conds_a_gt_b_t =     [("a", GT, "0")]
-let conds_a_gte_b_f =    [("a", GTE, "b")]
-let conds_a_gte_b_t_eq = [("a", GTE, "a")]
-let conds_a_gte_b_t =    [("a", GTE,"0")]
-let conds_mult_t_t =     [("a", LT, "b"); ("a", EQ, "a")]
-let conds_mult_t_f =     [("a", LT, "b"); ("a", EQ, "b")]
-let conds_mult_f_f =     [("a", LT, "0"); ("a", EQ, "b")]
-let conds_mult_t_t_d =   [("a", EQ, "a"); ("b", EQ, "b")]
 let row_tests = [
   "value: col a in row_a is a" >:: (fun _ ->
       assert_equal (value row_a "a") "a";);
@@ -92,54 +102,55 @@ let row_tests = [
   "to_csv row no vals: to_csv of row_a" >:: (fun _ ->
       assert_equal (to_csv row_empty) "";);
   "condition: LT, true, one cond; row_a, a < b" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_lt_b_t););
+      assert_equal (Some row_a) (cond_row_a [("a", LT, "b")]););
   "condition: LT, false, one cond; row_a, a < 0" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_lt_b_f););
+      assert_equal None (cond_row_a [("a", LT, "0")]););
   "condition: LTE, true, one cond; row_a, a <= b (less than)" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_lte_b_t););
+      assert_equal (Some row_a) (cond_row_a [("a", LTE, "b")]););
   "condition: LTE, true, one cond; row_a, a <= a (equal)" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_lte_b_t_eq););
+      assert_equal (Some row_a) (cond_row_a [("a", LTE, "a")]););
   "condition: LTE, false, one cond; row_a, a <= 0" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_lte_b_f););
+      assert_equal None (cond_row_a [("a", LTE,"0")]););
   "condition: EQ, true, one cond; row_a, a = a" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_eq_a_t););
+      assert_equal (Some row_a) (cond_row_a [("a", EQ, "a")]););
   "condition: EQ, false, one cond; row_a, a = b" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_eq_b_f););
+      assert_equal None (cond_row_a [("a", EQ, "b")]););
   "condition: NE, true, one cond; row_a, a <> b" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_ne_b_t););
+      assert_equal (Some row_a) (cond_row_a [("a", NE, "b")]););
   "condition: NE, false, one cond; row_a, a <> a" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_ne_a_f););
+      assert_equal None (cond_row_a [("a", NE, "a")]););
   "condition: GT, true, one cond; row_a, a > 0" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_gt_b_t););
+      assert_equal (Some row_a) (cond_row_a [("a", GT, "0")]););
   "condition: GT, false, one cond; row_a, a > b" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_gt_b_f););
+      assert_equal None (cond_row_a [("a", GT, "b")]););
   "condition: GTE, true, one cond; row_a, a >= 0 (greater than)" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_gte_b_t););
+      assert_equal (Some row_a) (cond_row_a [("a", GTE,"0")]););
   "condition: GTE, true, one cond; row_a, a >= a (equal)" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_a_gte_b_t_eq););
+      assert_equal (Some row_a) (cond_row_a [("a", GTE, "a")]););
   "condition: GTE, false, one cond; row_a, a >= b" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_a_gte_b_f););
+      assert_equal None (cond_row_a [("a", GTE, "b")]););
   "conditions: LT - true, EQ - true, two conds; a < b, a = a" >:: (fun _ ->
-      assert_equal (Some row_a) (cond_row_a conds_mult_t_t););
+      assert_equal (Some row_a) (cond_row_a [("a", LT, "b"); ("a", EQ, "a")]););
   "conditions: LT - true, EQ - false, two conds; a < b, a = b" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_mult_t_f););
+      assert_equal None (cond_row_a [("a", LT, "b"); ("a", EQ, "b")]););
   "conditions: LT - false, EQ - false, two conds; a < 0, a = b" >:: (fun _ ->
-      assert_equal None (cond_row_a conds_mult_f_f););
+      assert_equal None (cond_row_a [("a", LT, "0"); ("a", EQ, "b")]););
   "condition: No conditions, select a from a." >:: (fun _ ->
       assert_equal (Some row_a) (cond_row_a []););
   "condition: No conditions, select a from ab." >:: (fun _ ->
       assert_equal (Some row_a) (cond_row_ab_a []););
   "condition: select one col, condition another" >:: (fun _ ->
-      assert_equal (Some row_b) (cond_row_ab_b conds_a_eq_a_t);); 
+      assert_equal (Some row_b) (cond_row_ab_b [("a", EQ, "a")]);); 
   "condition: select two col, condition both" >:: (fun _ ->
-      assert_equal (Some row_ab) (cond_row_ab_ab conds_mult_t_t_d);); 
+      assert_equal (Some row_ab) 
+        (cond_row_ab_ab [("a", EQ, "a"); ("b", EQ, "b")]);); 
   "condition: select two col, condition one" >:: (fun _ ->
-      assert_equal (Some row_ab) (cond_row_ab_ab conds_a_eq_a_t);); 
+      assert_equal (Some row_ab) (cond_row_ab_ab [("a", EQ, "a")]);); 
   "condition: conditioning invalid column in condition." >:: (fun _ ->
       let inval_call = fun () -> cond_row_a [("c", EQ,"c")] in
       assert_raises (InvalidColumn "c") inval_call;);
   "condition: Invalid column in column selection, w/ conditions" >:: (fun _ ->
-      let inval_call = fun () -> (condition row_a ["d"]) conds_a_eq_a_t in
+      let inval_call = (fun () -> (condition row_a ["d"]) [("a", EQ, "a")]) in
       assert_raises (InvalidColumn "d") inval_call;);
   "condition: Invalid column in column selection, no conditions" >:: (fun _ ->
       let inval_call = fun () -> (condition row_a ["d"]) [] in
@@ -210,7 +221,7 @@ let table_tests = [
   "get_column: e in abc_cols_1, raises InvalidColumn e" >:: (fun _ ->
       let c = fun () -> get_column table_abc_cols_1 "e" in 
       assert_raises (InvalidColumn "e") c);
-  "update_cell: " >:: (fun _ -> 
+  "update_cell: c in abc_cols_1 to alt" >:: (fun _ -> 
       assert_equal table_abc_cols_1_alt 
         (update_cell table_abc_cols_1 0 "c" "alt"));
   "update_cell: 1 in abc_cols_1, raises InvalidKey 1" >:: (fun _ ->
@@ -284,6 +295,7 @@ let table_tests = [
 
 open Log
 let log_tests = [
+  (* "clean log" >:: (fun _ -> ignore (Sys.command "rm log.txt")); *)
   "write to log and get log" >:: (fun _ -> 
       ignore (write_log "test1");
       assert_equal "test1" (get_log ()););
@@ -413,14 +425,11 @@ let command_tests = [
       assert_raises (Malformed {|"in abc count_null"|}) c);
   (* General Errors *)
   {|Parse "in"|} >:: (fun _ -> 
-      let c = fun () -> parse "in" in
-      assert_raises (Malformed {|"in"|}) c);
+      assert_raises (Malformed {|"in"|}) (fun () -> parse "in"));
   {|Parse "asdf" (malformed)|} >:: (fun _ -> 
-      let c = fun () -> parse "asdf" in
-      assert_raises (Malformed {|"asdf"|}) c);
+      assert_raises (Malformed {|"asdf"|}) (fun () -> parse "asdf"));
   {|Parse "" (empty)|} >:: (fun _ -> 
-      let c = fun () -> parse "" in
-      assert_raises Empty c);
+      assert_raises Empty (fun () -> parse ""));
 ]
 
 let suite =
