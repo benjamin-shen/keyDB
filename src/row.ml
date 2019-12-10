@@ -1,7 +1,8 @@
-type t = (string * string) list
-
 exception InvalidColumn of string
 exception ValueMismatch of int
+
+(** An association list associating column names to values. *)
+type t = (Command.column * Command.value) list
 
 let empty = []
 
@@ -16,18 +17,18 @@ let rec update r c v = match r with
   | h::t -> if (fst h)=c then (c,v)::update t c v else h::update t c v
 
 let condition (r : t) (c : string list) (cd : Command.condition list) = 
-  (* [condition_cols acc c] goes through the columns in [c], 
-     checks if the column from the row satisfies all conditions from [cd], 
-     adds the column to the new row [acc] if so,
-     otherwise stops the function and returns none. *)
+  (** [condition_cols acc c] goes through the columns in [c], 
+      checks if the column from the row satisfies all conditions from [cd], 
+      adds the column to the new row [acc] if so,
+      otherwise stops the function and returns none. *)
   let rec condition_cols acc = function
     | [] -> Some acc
     | hcol::tcol -> 
       try
-        (* [column_check acc cd] goes through the conditions for a column,
-           checks if the column is a part of the condition,
-           if not adds the column, if it is manages the condition
-           if condition satisfied, add column, otherwise stop and return none *)
+        (** [column_check acc cd] goes through the conditions for a column,
+            checks if the column is a part of the condition,
+            if not adds the column, if it is manages the condition
+            if condition satisfied, add column, otherwise stop and return none *)
         let rec column_check acc' = function
           | [] -> condition_cols (add_column acc' hcol (value r hcol)) tcol
           | (col, op, v)::t -> 

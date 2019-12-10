@@ -199,9 +199,7 @@ let table_tests = [
   "insert_row: row2 insert in abc_cols_2 is abc_cols_3" >:: (fun _ -> 
       assert_equal table_abc_cols_3 
         (insert_row table_abc_cols_2 row2));   
-  (* BROKEN TEST CASES
-     "remove_row: removing 2 from abc_cols_3 is abc_cols_2" >:: (fun _ -> 
-        assert_equal table_abc_cols_2 (remove_row table_abc_cols_3 2));   
+  (* BROKEN TEST CASE 
        "remove_rows: removing rows 2, 1 from abc_cols_3 is abc_cols_1" >:: (fun _ -> 
         assert_equal table_abc_cols_1 (remove_rows table_abc_cols_3 [2;1]));  *)  
   "get_column: column a in abc_cols_1 is [(0,0a)]" >:: (fun _ -> 

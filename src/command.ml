@@ -74,7 +74,7 @@ let rec list_to_conditions acc = function
   | _ -> failwith "Invalid condition."
 
 (** [select_where input] turns [input] into a select table command. 
-    Raises: [Failure] if [input] cannot be interpreted as 
+    Raises: [Failure str] if [input] cannot be interpreted as 
     a select table command. *)
 let select_where input =
   match input with
@@ -102,7 +102,7 @@ let select_where input =
       in select_builder (Select ([],[])) true (h::t)
 
 (** [table_command input] is the table command represented by [input]. 
-    Raises: [Failure] if [input] cannot be interpreted as 
+    Raises: [Failure str] if [input] cannot be interpreted as 
     a table command. *)
 let table_command input =
   let command_verb = head input in 

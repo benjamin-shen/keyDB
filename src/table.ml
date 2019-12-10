@@ -1,26 +1,17 @@
-type key = int
-type column = string
-type value = string
-type condition = string
-
 exception ColumnExists of string
 exception InvalidColumn of string
 exception InvalidKey of string
 exception TypeError
 
-(** [null] is the null value of a cell. *)
-let null = "_"
-
-(** AF: An association list mapping keys to rows, that 
-    represents a database table.
-  * RI: TODO *)
+(** A record holding the table's highest key, column names, and rows. *)
 type t = {
-  key: int;
-  columns: column list;
-  table: (key * Row.t) list
+  key: Command.key;
+  columns: Command.column list;
+  table: (Command.key * Row.t) list
 }
 
-let rep_ok t = t
+(** [null] is the null value of a cell. *)
+let null = "_"
 
 let empty = {
   key = -1;
@@ -48,6 +39,8 @@ let insert_row t r = {
   table = t.table @ [(t.key + 1,r)]
 }
 
+(** [remove_row t k] removes a row with key [k] from a table [t] and returns a
+    table without the specified row. *)
 let remove_row t k =  { 
   key = t.key;
   columns = t.columns;
@@ -112,11 +105,11 @@ let delete_columns t c =
     table = del_column t.table c;
   }
 
-let select (c : column list) cd t = 
+let select c cd t = 
   try 
     (** [conditioned_table acc table] conditions table [table] to only contain
         rows satisfying the conditions. *)
-    let rec conditioned_table (acc : (key * Row.t) list) = function
+    let rec conditioned_table (acc : (Command.key * Row.t) list) = function
       | [] -> acc
       | (k, r)::t -> 
         match Row.condition r c cd with
@@ -179,19 +172,19 @@ let sum_column t c =
        |> string_of_float
   else raise TypeError
 
-(** [count_null c] counts the number of elements in list [c] with 
+(** [lst_count_null c] counts the number of elements in list [c] with 
     an empty value. *)
-let rec count_null = function
+let rec lst_count_null = function
   | [] -> 0
-  | (_,v)::t -> if v=null then 1 else 0 + count_null t
+  | (_,v)::t -> if v=null then 1 else 0 + lst_count_null t
 
 let count t c =
   let col = get_column t c in
-  string_of_int (List.length col - count_null col)
+  string_of_int (List.length col - lst_count_null col)
 
 let count_null t c =
   let col = get_column t c in
-  string_of_int (count_null col)
+  string_of_int (lst_count_null col)
 
 (** [string_row k r col] converts the row [r] to a string. *)
 let string_row k r col =
